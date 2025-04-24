@@ -237,6 +237,7 @@ mkdir build-release
 
 cd build-release
 
+#On ubuntu (for other distros check link):
 cmake -G Ninja  -DLLVM_TARGETS_TO_BUILD="RISCV" -DLLVM_ENABLE_PROJECTS="clang;lld" -DCMAKE_BUILD_TYPE=Release -DLLVM_BUILD_TESTS=OFF -DLLVM_INCLUDE_TESTS=OFF "../llvm/"
 
 ninja -j6
@@ -250,10 +251,10 @@ git clone https://github.com/riscv/riscv-gnu-toolchain
 
 cd riscv-gnu-toolchain
 
-#On ubuntu (for other check link):
+#On ubuntu (for other distros check link):
 sudo apt-get install autoconf automake autotools-dev curl python3 python3-pip python3-tomli libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build git cmake libglib2.0-dev libslirp-dev
 
-./configure --prefix=./riscv --with-arch=rv32imafdcbk --with-abi=ilp32d
+./configure --prefix=./riscv --with-arch=rv32gc --with-abi=ilp32d
 
 make
 ```
