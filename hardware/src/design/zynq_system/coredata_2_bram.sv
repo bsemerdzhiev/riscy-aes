@@ -27,7 +27,7 @@ module coredata_2_bram #(
 
   //ASSIGNS
   assign gnt_o 		= req_i;
-  assign rdata_o	= we_i ? 0 : din;
+  assign rdata_o	= din;
   assign addr     = addr_i;
   assign dout	    = we_i ? wdata_i : '0;
   
