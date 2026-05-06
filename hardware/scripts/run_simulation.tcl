@@ -23,5 +23,12 @@ open_wave_config ./src/simulation/zynq_tb_behav.wcfg
 # Restart simulation to apply the waveform config properly
 restart
 
+
+open_saif ./baseline_aes.saif
+
+
+
 # Run simulation until it finishes (e.g., until $finish or simulation time ends)
 run -all
+
+close_saif

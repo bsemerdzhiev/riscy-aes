@@ -165,6 +165,16 @@ package cv32e40p_pkg;
     ALU_PCKHI = 7'b0111001
 
   } alu_opcode_e;
+  
+  ///////////////////////////////////////////////////////////////////////////////////
+  parameter CRYPTO_OP_WIDTH = 3;
+
+  typedef enum logic [CRYPTO_OP_WIDTH-1:0] {
+      AES32_ESI       = 3'b000,
+      AES32_ESMI      = 3'b001,
+      AES32_DSI       = 3'b010,
+      AES32_DSMI      = 3'b011
+    } crypto_op_e;
 
   parameter MUL_OP_WIDTH = 3;
 

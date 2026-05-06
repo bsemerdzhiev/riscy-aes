@@ -20,7 +20,7 @@ set_property USED_IN {synthesis implementation out_of_context} [get_files -all r
 add_files -fileset constrs_1 -norecurse ./src/design/constraints/ooc_constraints.xdc
 
 # Run out-of-order synthesis
-synth_design -top riscv_ooc_top_level_wrapper -constrset constrs_1 -part xc7z010clg400-1 -mode out_of_context
+synth_design -top riscv_ooc_top_level_wrapper -constrset constrs_1 -part xc7z020clg400-1 -mode out_of_context
 
 # Write synthesized design
 write_checkpoint -force ./vivado/ooc_riscy/ooc_riscy.runs/ooc_synth/riscv_synth.dcp
@@ -30,4 +30,4 @@ report_timing_summary -delay_type min_max -report_unconstrained -check_timing_ve
 
 # Report Utilization
 report_utilization -name utilization_1 
-report_utilization -cell [get_cells RISCV_CORE] -file ./vivado/ooc_riscy/ooc_riscy.runs/ooc_synth/ooc_utilization_summary.txt
+report_utilization -cell [get_cells riscv_core] -file ./vivado/ooc_riscy/ooc_riscy.runs/ooc_synth/ooc_utilization_summary.txt
