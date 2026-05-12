@@ -130,7 +130,7 @@ module cv32e40p_aes
   input logic [1:0]         chosen_op_i,
 
   //outputs
-  output logic [31:0]       mix_columns_o
+  output logic [31:0]       final_output
 );
 
 logic [5:0] shamt;
@@ -139,8 +139,11 @@ logic [7:0] sbox_output;
 logic direction = chosen_op_i[0];
 
 logic [7:0] mix_columns_col_i;
+logic [31:0] mix_columns_o;
 
 mix_columns mix_columns_i(.col(mix_columns_col_i), .bs(bs_i), .direction(direction), .result(mix_columns_o));
+
+assign final_output = (chosen_op_i == 2'b00 || chosen_op_i == 2'b10) ? mix_columns_o : (key_i ^ {24'h0, sbox_output});
 
 always_comb begin
   shamt = {1'b0, bs_i, 3'b0};
@@ -195,7 +198,6 @@ always_comb begin
     /////////////////////////////////////////////////////////////
     2'b11: begin
       sbox_output = AES_INV_SBOX[sbox_input];
-      // im a bit lost on how to continue
     end
    endcase
 end
