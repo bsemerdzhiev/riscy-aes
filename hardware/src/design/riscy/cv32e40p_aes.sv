@@ -54,6 +54,8 @@ module mix_columns#()
   input logic [7: 0] col,
   input logic [1:0]  bs,
 
+  input logic direction,
+
 //outputs
   output logic [31:0] result
 );
@@ -67,6 +69,8 @@ always_comb begin
   result = 32'h0;
 
   case(bs)
+    //TODO: Check the direction forward or backward
+    
     2'd0: begin
       result = {results[0], col, col, results[1]};
     end
