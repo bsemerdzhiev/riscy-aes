@@ -5,13 +5,11 @@
 //                                                                            //
 //                                                                            //
 //                                                                            //
-//                                                                            //
-//                                                                            //
 // Design Name:    AES                                                        //
 // Project Name:   RI5CY                                                      //
 // Language:       SystemVerilog                                              //
 //                                                                            //
-// Description:    Performs the AES encryption single run on a selected byte  //
+// Description:    Performs the AES encryption single run with a selected byte//
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 module gf_mult#()
@@ -95,8 +93,6 @@ module cv32e40p_aes
 #()
 (
 //inputs
-    input logic               enable_i,
-
     input logic [1:0]         bs_i,
     input logic [31:0]        matrix_input_i,
     input logic [31:0]        key_i,
