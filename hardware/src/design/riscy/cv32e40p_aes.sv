@@ -46,6 +46,7 @@ always_comb begin
     shifting_b = shifting_b >> 1;
   end
 end
+
 endmodule
 
 module mix_columns#()
@@ -149,6 +150,8 @@ always_comb begin
   shamt = {1'b0, bs_i, 3'b0};
   sbox_input = matrix_input_i[shamt +: 8];
 
+  mix_columns_col_i = 0;
+
   case(chosen_op_i)
 
     ////////////////////////////////////////////////////////////////////
@@ -201,5 +204,4 @@ always_comb begin
     end
    endcase
 end
-
 endmodule
