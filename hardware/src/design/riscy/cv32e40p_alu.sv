@@ -948,7 +948,7 @@ module cv32e40p_alu
       ALU_ROR:
       result_o = shift_result;
 
-      AES_ESI, AES_ESMI, AES_DSI, AES_DSMI:
+      AES32_ESI, AES32_ESMI, AES32_DSI, AES32_DSMI:
       result_o = aes_o;
 
       // bit manipulation instructions
