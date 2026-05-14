@@ -7,7 +7,7 @@ add_files -norecurse ./src/design/riscy/include/
 
 update_compile_order -fileset sources_1
 
-set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value -mode_out_of_context -objects [get_runs synth_1]
+set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value {-mode out_of_context} -objects [get_runs synth_1]
 
 # Set the default top-level module for the project
 set_property top riscv_ooc_top_level_wrapper [current_fileset]
@@ -30,4 +30,5 @@ report_timing_summary -delay_type min_max -report_unconstrained -check_timing_ve
 
 # Report Utilization
 report_utilization -name utilization_1 
+
 report_utilization -cell [get_cells riscv_core] -file ./vivado/ooc_riscy/ooc_riscy.runs/ooc_synth/ooc_utilization_summary.txt

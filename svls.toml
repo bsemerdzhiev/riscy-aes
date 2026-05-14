@@ -1,0 +1,5 @@
+[verilog]
+include_dirs = [
+  "hardware/src/riscy/include",
+  "hardware/src/riscy",
+]
