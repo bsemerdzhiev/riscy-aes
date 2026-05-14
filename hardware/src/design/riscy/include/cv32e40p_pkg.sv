@@ -36,7 +36,7 @@ package cv32e40p_pkg;
 
   parameter OPCODE_SYSTEM = 7'h73;
   parameter OPCODE_FENCE = 7'h0f;
-  parameter OPCODE_OP = 7'h33;
+  parameter OPCODE_OP = 7'h33;   
   parameter OPCODE_OPIMM = 7'h13;
   parameter OPCODE_STORE = 7'h23;
   parameter OPCODE_LOAD = 7'h03;
@@ -173,7 +173,8 @@ package cv32e40p_pkg;
       AES32_ESI       = 3'b000,
       AES32_ESMI      = 3'b001,
       AES32_DSI       = 3'b010,
-      AES32_DSMI      = 3'b011
+      AES32_DSMI      = 3'b011, 
+      AES32_NONE      = 3'b111   // maybe remove later
     } crypto_op_e;
 
   parameter MUL_OP_WIDTH = 3;

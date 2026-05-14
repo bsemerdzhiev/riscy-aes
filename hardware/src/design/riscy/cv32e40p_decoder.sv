@@ -153,9 +153,9 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   input  logic [31:0] mcounteren_i,
   
   // CRYPTO
-  output logic                crypto_en_o,
-  output crypto_op_e          crypto_operator_o,
-  output logic [1:0]          crypto_bs_o
+  output logic                crypto_en_o,         // enable signal for the NEW crypto/AES module
+  output crypto_op_e          crypto_operator_o,   // selector of 1 of the 4 AES instructions
+  output logic [1:0]          crypto_bs_o          // byte selector
 );
 
   // write enable/request control
@@ -184,8 +184,12 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   
   ////////////////////////////////////////////           Is the incomming instruction of AES32 TYPE, combinational logic
   logic is_aes32;
-  assign is_aes32 = instr_rdata_i[29] && instr_rdata_i[25] && (instr_rdata_i[14:12] == 3'b000) && (instr_rdata_i[28:26] inside {3'b000,3'b001,3'b010,3'b011});
-
+  assign is_aes32 =
+  (instr_rdata_i[6:0]   == OPCODE_OP) &&
+  (instr_rdata_i[14:12] == 3'b000) &&
+  (instr_rdata_i[29]    == 1'b1) &&
+  (instr_rdata_i[25]    == 1'b1) &&
+  (instr_rdata_i[28:26] inside {3'b000, 3'b001, 3'b010, 3'b011});
   ////////////////////////////////////////////
 
   /////////////////////////////////////////////
@@ -293,7 +297,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
     
     ///////////////////////////////////
     crypto_en_o       = 1'b0;
-    //crypto_operator_o = 3'b000;
+    crypto_operator_o = AES32_ESI; //good to have a default value
     crypto_bs_o       = 2'b00;
     ///////////////////////////////////
 
@@ -625,6 +629,9 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
         crypto_en_o    = 1'b1;
         alu_en         = 1'b0;
         crypto_bs_o    = instr_rdata_i[31:30];
+        
+        alu_op_a_mux_sel_o = OP_A_REGA_OR_FWD;
+        alu_op_b_mux_sel_o = OP_B_REGB_OR_FWD;
         
         unique case(instr_rdata_i[28:26])
           
