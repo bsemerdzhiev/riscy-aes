@@ -167,14 +167,14 @@ package cv32e40p_pkg;
   } alu_opcode_e;
   
   ///////////////////////////////////////////////////////////////////////////////////
-  parameter CRYPTO_OP_WIDTH = 3;
+  parameter CRYPTO_OP_WIDTH = 2;
 
   typedef enum logic [CRYPTO_OP_WIDTH-1:0] {
-      AES32_ESI       = 3'b000,
-      AES32_ESMI      = 3'b001,
-      AES32_DSI       = 3'b010,
-      AES32_DSMI      = 3'b011, 
-      AES32_NONE      = 3'b111   // maybe remove later
+      AES32_ESI       = 2'b00,
+      AES32_ESMI      = 2'b01,
+      AES32_DSI       = 2'b10,
+      AES32_DSMI      = 2'b11 
+      //AES32_NONE      = 2'b11   // maybe remove later
     } crypto_op_e;
 
   parameter MUL_OP_WIDTH = 3;
@@ -766,7 +766,7 @@ package cv32e40p_pkg;
   C_XF16ALT ? 16 :  // Xf16alt ext.
   C_XF8 ? 8 :  // Xf8 ext.
   C_XF8ALT ? 8 :  // Xf8alt ext.
-  0;  // Unused in case of no FP
+  0;  // Unused in case of no F
 
   parameter C_FFLAG = 5;
   parameter C_RM = 3;
