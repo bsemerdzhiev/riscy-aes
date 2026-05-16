@@ -21,6 +21,7 @@
 
 
 `timescale 1ns/1ps
+`include "assert.svh"
 
 // Self-checking testbench for cv32e40p_aes
 // Assumes aes_pkg defines:
@@ -202,8 +203,8 @@ module tb_cv32e40p_aes;
     // Directed tests. These catch byte ordering, key XOR, and direction bugs.
     check_one(2'd0, 32'h00112233, 32'h00000000, AES32_ESI);
     check_one(2'd0, 32'h00112233, 32'h89abcdef, AES32_ESMI);
-   // check_one(2'd2, 32'hdeadbeef, 32'h12345678, AES32_DSMI);
-   // check_one(2'd3, 32'hcafebabe, 32'hffffffff, AES32_DSI);
+    check_one(2'd2, 32'hdeadbeef, 32'h12345678, AES32_DSMI);
+    check_one(2'd3, 32'hcafebabe, 32'hffffffff, AES32_DSI);
 
 
     /*

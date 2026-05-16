@@ -179,13 +179,6 @@ module cv32e40p_core
   logic alu_is_clpx_ex, alu_is_subrot_ex;
   logic        [                 1:0]       alu_clpx_shift_ex;
   
-  // AES control
-  logic       crypto_en_ex;
-  logic [2:0] crypto_operator_ex;
-  logic        [31:0] crypto_operand_a_ex;
-  logic        [31:0] crypto_operand_b_ex;
-  logic [1:0] crypto_bs_ex;
-
   // Multiplier Control
   mul_opcode_e                              mult_operator_ex;
   logic        [                31:0]       mult_operand_a_ex;
@@ -202,6 +195,14 @@ module cv32e40p_core
   logic                                     mult_is_clpx_ex;
   logic        [                 1:0]       mult_clpx_shift_ex;
   logic                                     mult_clpx_img_ex;
+
+  // AES Control
+  crypto_op_e                               aes_operator_ex;
+  logic        [                31:0]       aes_operand_a_ex;
+  logic        [                31:0]       aes_operand_b_ex;
+  logic        [                31:0]       aes_operand_c_ex;
+  logic                                     aes_en_ex;
+  logic        [                 1:0]       aes_bs_ex;
 
   // FPU
   logic        [            C_RM-1:0]       frm_csr;
@@ -592,13 +593,18 @@ module cv32e40p_core
       .alu_is_clpx_ex_o   (alu_is_clpx_ex),
       .alu_is_subrot_ex_o (alu_is_subrot_ex),
       .alu_clpx_shift_ex_o(alu_clpx_shift_ex),
-      //////////////////////////////////////////////////////////////////////////  AES
-      .crypto_en_ex_o       (crypto_en_ex),
-      .crypto_operator_ex_o (crypto_operator_ex),
-      .crypto_bs_ex_o       (crypto_bs_ex),
-      .crypto_operand_a_ex_o(crypto_operand_a_ex),
-      .crypto_operand_b_ex_o(crypto_operand_a_ex),
-      //////////////////////////////////////////////////////////////////////////
+
+      // AES
+      //----------------------------------------------------------------------------------------------------  AES
+      .crypto_en_ex_o       (aes_en_ex),
+      .crypto_operator_ex_o (aes_operator_ex),
+      .crypto_bs_ex_o       (aes_bs_ex),
+      //----------------------------------------------------------------------------------------------------  AES
+      .crypto_operand_a_ex_o(aes_operand_a_ex),
+      .crypto_operand_b_ex_o(aes_operand_b_ex),
+      .crypto_operand_c_ex_o(aes_operand_c_ex),
+      //----------------------------------------------------------------------------------------------------  AES
+      
       .regfile_waddr_ex_o(regfile_waddr_ex),
       .regfile_we_ex_o   (regfile_we_ex),
 
@@ -777,6 +783,17 @@ module cv32e40p_core
       .alu_is_clpx_i   (alu_is_clpx_ex),  // from ID/EX pipe registers
       .alu_is_subrot_i (alu_is_subrot_ex),  // from ID/Ex pipe registers
       .alu_clpx_shift_i(alu_clpx_shift_ex),  // from ID/EX pipe registers
+
+      // AES
+      
+      .aes_operator_i   (aes_operator_ex),
+      .aes_en_i         (aes_en_ex),
+      .aes_operand_a_i  (aes_operand_a_ex),
+      .aes_operand_b_i  (aes_operand_b_ex),
+      .aes_operand_c_i  (aes_operand_c_ex),
+      .aes_bs_i         (aes_bs_ex),
+
+
 
       // Multipler
       .mult_operator_i   (mult_operator_ex),  // from ID/EX pipe registers

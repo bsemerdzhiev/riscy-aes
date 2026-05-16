@@ -56,6 +56,16 @@ module cv32e40p_ex_stage
     input logic               alu_is_subrot_i,
     input logic        [ 1:0] alu_clpx_shift_i,
 
+    input alu_opcode_e        alu_operator_i,
+
+    // AES
+    input crypto_op_e         aes_operator_i,
+    input logic               aes_en_i,
+    input logic        [31:0] aes_operand_a_i,
+    input logic        [31:0] aes_operand_b_i,
+    input logic        [31:0] aes_operand_c_i,
+    input logic        [ 1:0] aes_bs_i,
+
     // Multiplier signals
     input mul_opcode_e        mult_operator_i,
     input logic        [31:0] mult_operand_a_i,
@@ -154,6 +164,8 @@ module cv32e40p_ex_stage
 
   logic [31:0] alu_result;
   logic [31:0] mult_result;
+  logic [31:0] aes_result;
+
   logic        alu_cmp_result;
 
   logic        regfile_we_lsu;
@@ -195,7 +207,12 @@ module cv32e40p_ex_stage
     end else begin
       regfile_alu_we_fw_o    = regfile_alu_we_i & ~apu_en_i;  // private fpu incomplete?
       regfile_alu_waddr_fw_o = regfile_alu_waddr_i;
+
       if (alu_en_i) regfile_alu_wdata_fw_o = alu_result;
+
+      // this muxes the output to the aes's result
+      if (aes_en_i) regfile_alu_wdata_fw_o = aes_result;
+
       if (mult_en_i) regfile_alu_wdata_fw_o = mult_result;
       if (csr_access_i) regfile_alu_wdata_fw_o = csr_rdata_i;
     end
@@ -260,6 +277,22 @@ module cv32e40p_ex_stage
       .ex_ready_i(ex_ready_o)
   );
 
+  /////////////////////////////////////////
+  //     /\   |  ____|/ ____|___ \__ \   //
+  //    /  \  | |__  | (___   __) | ) |  // 
+  //   / /\ \ |  __|  \___ \ |__ < / /   //  
+  //  / ____ \| |____ ____) |___) / /_   //
+  // /_/    \_\______|_____/|____/____|  //
+  //                                     //
+  /////////////////////////////////////////
+  
+  cv32e40p_aes aes_i (
+    .bs_i(aes_bs_i),
+    .matrix_input_i(aes_operand_a_i),
+    .key_i(aes_operand_b_i),
+    .chosen_op_i(aes_bs_i),
+    .aes_o(aes_result)
+  );
 
   ////////////////////////////////////////////////////////////////
   //  __  __ _   _ _   _____ ___ ____  _     ___ _____ ____     //
