@@ -56,14 +56,11 @@ module cv32e40p_ex_stage
     input logic               alu_is_subrot_i,
     input logic        [ 1:0] alu_clpx_shift_i,
 
-    input alu_opcode_e        alu_operator_i,
-
     // AES
     input crypto_op_e         aes_operator_i,
     input logic               aes_en_i,
     input logic        [31:0] aes_operand_a_i,
     input logic        [31:0] aes_operand_b_i,
-    input logic        [31:0] aes_operand_c_i,
     input logic        [ 1:0] aes_bs_i,
 
     // Multiplier signals

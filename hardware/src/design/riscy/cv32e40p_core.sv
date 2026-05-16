@@ -200,7 +200,6 @@ module cv32e40p_core
   crypto_op_e                               aes_operator_ex;
   logic        [                31:0]       aes_operand_a_ex;
   logic        [                31:0]       aes_operand_b_ex;
-  logic        [                31:0]       aes_operand_c_ex;
   logic                                     aes_en_ex;
   logic        [                 1:0]       aes_bs_ex;
 
@@ -602,7 +601,6 @@ module cv32e40p_core
       //----------------------------------------------------------------------------------------------------  AES
       .crypto_operand_a_ex_o(aes_operand_a_ex),
       .crypto_operand_b_ex_o(aes_operand_b_ex),
-      .crypto_operand_c_ex_o(aes_operand_c_ex),
       //----------------------------------------------------------------------------------------------------  AES
       
       .regfile_waddr_ex_o(regfile_waddr_ex),
@@ -785,15 +783,11 @@ module cv32e40p_core
       .alu_clpx_shift_i(alu_clpx_shift_ex),  // from ID/EX pipe registers
 
       // AES
-      
       .aes_operator_i   (aes_operator_ex),
       .aes_en_i         (aes_en_ex),
       .aes_operand_a_i  (aes_operand_a_ex),
       .aes_operand_b_i  (aes_operand_b_ex),
-      .aes_operand_c_i  (aes_operand_c_ex),
       .aes_bs_i         (aes_bs_ex),
-
-
 
       // Multipler
       .mult_operator_i   (mult_operator_ex),  // from ID/EX pipe registers

@@ -153,7 +153,7 @@ module cv32e40p_id_stage
     
     // new AES outputs to eecutio ////////////////////////////////////////////////////////////////////////
     output logic        crypto_en_ex_o,
-    output logic [2:0]  crypto_operator_ex_o,
+    output crypto_op_e  crypto_operator_ex_o,
     output logic [31:0] crypto_operand_a_ex_o,
     output logic [31:0] crypto_operand_b_ex_o,
     output logic [1:0]  crypto_bs_ex_o,
@@ -371,7 +371,7 @@ module cv32e40p_id_stage
   
   // new AES Control/////////////////////////////////////////////////////////////////////////////////////////
   logic       crypto_en;
-  logic [2:0] crypto_operator;
+  crypto_op_e crypto_operator;
   logic [1:0] crypto_bs;
 
   // Multiplier Control
@@ -1429,7 +1429,7 @@ module cv32e40p_id_stage
       
       ////////////////////////////////////////////////////////////////////////////////////
       crypto_en_ex_o           <= 1'b0;
-      crypto_operator_ex_o     <= AES32_NONE;
+      crypto_operator_ex_o     <= AES32_ESI;
       crypto_bs_ex_o           <= 2'b00;
       crypto_operand_a_ex_o    <= '0;
       crypto_operand_b_ex_o    <= '0;
@@ -1539,7 +1539,6 @@ module cv32e40p_id_stage
           crypto_bs_ex_o          <= crypto_bs;
           crypto_operand_a_ex_o   <= alu_operand_a;  //forwarded rs1
           crypto_operand_b_ex_o   <= alu_operand_b;  //forwarded rs2
-          //crypto_operand_c_ex_o   <= alu_operand_c;
         end
         ////////////////////////////////////////////////////////////////////////////////////////////////
 

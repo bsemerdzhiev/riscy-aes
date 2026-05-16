@@ -174,7 +174,6 @@ package cv32e40p_pkg;
       AES32_ESMI      = 2'b01,
       AES32_DSI       = 2'b10,
       AES32_DSMI      = 2'b11 
-      //AES32_NONE      = 2'b11   // maybe remove later
     } crypto_op_e;
 
   parameter MUL_OP_WIDTH = 3;

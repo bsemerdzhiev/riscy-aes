@@ -64,7 +64,6 @@ module mix_columns#()
 
 // encryption
 logic [7:0] results_enc[0:1];
-logic direction_local;
 
 gf_mult u_col_one   (.a(8'h02), .b(col), .result(results_enc[0]));
 gf_mult u_col_two   (.a(8'h03), .b(col), .result(results_enc[1]));
@@ -80,7 +79,6 @@ gf_mult u_col_four_dec (.a(8'h09), .b(col), .result(results_dec[3]));
 
 always_comb begin
   result = 32'h0;
-  assign direction_local = direction;
 
   case(bs)
     2'd0: begin
@@ -130,7 +128,7 @@ module cv32e40p_aes
   input logic [31:0]        key_i,
 
   // 00 - esmi, 01 - esi, 10 - dsmi, 11 - dsi
-  input logic [1:0]         chosen_op_i,
+  input crypto_op_e   chosen_op_i,
 
   //outputs
   output logic [31:0]       aes_o
@@ -139,17 +137,20 @@ module cv32e40p_aes
 logic [5:0] shamt;
 logic [7:0] sbox_input;
 logic [7:0] sbox_output;
-//logic direction = chosen_op_i[1];   // bit 1 for direction
 
 logic [7:0] mix_columns_col_i;
 logic [31:0] mix_columns_o;
+
+
+//TODO: Check why it breaks the testbench
+//logic direction = chosen_op_i[1];   // bit 1 for direction
 logic direction;
 
 assign direction = chosen_op_i[1];
 
 mix_columns mix_columns_i(.col(mix_columns_col_i), .bs(bs_i), .direction(direction), .result(mix_columns_o));
 
-//assign aes_o = (chosen_op_i == 2'b00 || chosen_op_i == 2'b10) ? (key_i ^ mix_columns_o) : (key_i ^ {24'h0, sbox_output});
+//assign aes_o = (chosen_op_i == 2'b00 || chosen_op_i == 2'b10) ? (key_i ^ {24'h0, sbox_output}): (key_i ^ mix_columns_o);
 assign aes_o = chosen_op_i[0] ?
                (key_i ^ mix_columns_o) :
                (key_i ^ {24'h0, sbox_output});
