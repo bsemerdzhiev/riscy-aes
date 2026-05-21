@@ -880,249 +880,224 @@
     8652     8652        0     1                 .L0 
     8654     8654        0     1                 .L0 
     8654     8654        0     1                 .L0 
-    8654     8654      20e     2 .text.aes128_encrypt_block
-    8654     8654      20e     2         main.o:(.text.aes128_encrypt_block)
+    8654     8654      1ee     2 .text.aes128_encrypt_block
+    8654     8654      1ee     2         main.o:(.text.aes128_encrypt_block)
     8654     8654        0     1                 .L0 
     8654     8654        0     1                 .L0 
     8654     8654        0     1                 $x
     8654     8654        0     1                 .L0 
-    8654     8654      20e     1                 aes128_encrypt_block
-    8668     8668        0     1                 .L0 
-    866c     866c        0     1                 .L0 
-    86ec     86ec        0     1                 .L0 
-    86ec     86ec        0     1                 .L0 
-    86f0     86f0        0     1                 .L0 
-    86f0     86f0        0     1                 .L0 
+    8654     8654      1ee     1                 aes128_encrypt_block
+    8656     8656        0     1                 .L0 
+    8658     8658        0     1                 .L0 
+    86e2     86e2        0     1                 .L0 
+    86e2     86e2        0     1                 .L0 
+    86e6     86e6        0     1                 .L0 
+    86e6     86e6        0     1                 .L0 
+    86ea     86ea        0     1                 .L0 
     86f4     86f4        0     1                 .L0 
+    86f8     86f8        0     1                 .L0 
+    86fc     86fc        0     1                 .L0 
+    86fc     86fc        0     1                 .L0 
     86fe     86fe        0     1                 .L0 
-    8702     8702        0     1                 .L0 
+    86fe     86fe        0     1                 .L0 
     8706     8706        0     1                 .L0 
     8706     8706        0     1                 .L0 
-    8716     8716        0     1                 .L0 
-    8716     8716        0     1                 .L0 
-    8716     8716        0     1                 .L0 
+    8706     8706        0     1                 .L0 
+    870e     870e        0     1                 .L0 
+    8710     8710        0     1                 .L0 
+    8714     8714        0     1                 .L0 
     8718     8718        0     1                 .L0 
-    8718     8718        0     1                 .L0 
-    8718     8718        0     1                 .L0 
-    871c     871c        0     1                 .L0 
+    871a     871a        0     1                 .L0 
+    871e     871e        0     1                 .L0 
     8722     8722        0     1                 .L0 
-    8726     8726        0     1                 .L0 
-    872c     872c        0     1                 .L0 
+    8724     8724        0     1                 .L0 
+    8728     8728        0     1                 .L0 
     872c     872c        0     1                 .L0 
     8730     8730        0     1                 .L0 
     8734     8734        0     1                 .L0 
-    8734     8734        0     1                 .L0 
-    8738     8738        0     1                 .L0 
     873c     873c        0     1                 .L0 
-    8740     8740        0     1                 .L0 
     8744     8744        0     1                 .L0 
-    8748     8748        0     1                 .L0 
     874c     874c        0     1                 .L0 
     8750     8750        0     1                 .L0 
-    8750     8750        0     1                 .L0 
-    8754     8754        0     1                 .L0 
     8754     8754        0     1                 .L0 
     8758     8758        0     1                 .L0 
-    8758     8758        0     1                 .L0 
-    875c     875c        0     1                 .L0 
     8760     8760        0     1                 .L0 
-    8764     8764        0     1                 .L0 
     8768     8768        0     1                 .L0 
-    876c     876c        0     1                 .L0 
     8770     8770        0     1                 .L0 
     8774     8774        0     1                 .L0 
-    8778     8778        0     1                 .L0 
-    877c     877c        0     1                 .L0 
+    8776     8776        0     1                 .L0 
+    877a     877a        0     1                 .L0 
     8780     8780        0     1                 .L0 
-    8784     8784        0     1                 .L0 
-    8788     8788        0     1                 .L0 
-    878c     878c        0     1                 .L0 
+    8786     8786        0     1                 .L0 
+    878a     878a        0     1                 .L0 
+    878e     878e        0     1                 .L0 
     8792     8792        0     1                 .L0 
-    8792     8792        0     1                 .L0 
-    8794     8794        0     1                 .L0 
-    8794     8794        0     1                 .L0 
-    8794     8794        0     1                 .L0 
+    8796     8796        0     1                 .L0 
     8798     8798        0     1                 .L0 
-    87a2     87a2        0     1                 .L0 
-    87aa     87aa        0     1                 .L0 
-    87aa     87aa        0     1                 .L0 
-    87ac     87ac        0     1                 .L0 
-    87b2     87b2        0     1                 .L0 
-    87b2     87b2        0     1                 .L0 
-    87b4     87b4        0     1                 .L0 
-    87b4     87b4        0     1                 .L0 
-    87b4     87b4        0     1                 .L0 
+    8798     8798        0     1                 .L0 
+    879a     879a        0     1                 .L0 
+    879a     879a        0     1                 .L0 
+    879c     879c        0     1                 .L0 
+    879e     879e        0     1                 .L0 
+    87a0     87a0        0     1                 .L0 
+    87a0     87a0        0     1                 .L0 
+    87a4     87a4        0     1                 .L0 
+    87a4     87a4        0     1                 .L0 
+    87b0     87b0        0     1                 .L0 
     87b8     87b8        0     1                 .L0 
-    87be     87be        0     1                 .L0 
-    87c2     87c2        0     1                 .L0 
+    87c0     87c0        0     1                 .L0 
     87c4     87c4        0     1                 .L0 
     87c8     87c8        0     1                 .L0 
-    87c8     87c8        0     1                 .L0 
     87cc     87cc        0     1                 .L0 
-    87d0     87d0        0     1                 .L0 
-    87d0     87d0        0     1                 .L0 
     87d4     87d4        0     1                 .L0 
-    87d8     87d8        0     1                 .L0 
     87dc     87dc        0     1                 .L0 
-    87e0     87e0        0     1                 .L0 
     87e4     87e4        0     1                 .L0 
     87e8     87e8        0     1                 .L0 
     87ec     87ec        0     1                 .L0 
-    87ec     87ec        0     1                 .L0 
     87f0     87f0        0     1                 .L0 
-    87f0     87f0        0     1                 .L0 
-    87f4     87f4        0     1                 .L0 
-    87f4     87f4        0     1                 .L0 
     87f8     87f8        0     1                 .L0 
-    87fc     87fc        0     1                 .L0 
     8800     8800        0     1                 .L0 
-    8804     8804        0     1                 .L0 
     8808     8808        0     1                 .L0 
     880c     880c        0     1                 .L0 
     8810     8810        0     1                 .L0 
     8814     8814        0     1                 .L0 
     8818     8818        0     1                 .L0 
     8818     8818        0     1                 .L0 
-    881c     881c        0     1                 .L0 
-    881c     881c        0     1                 .L0 
     8820     8820        0     1                 .L0 
-    8824     8824        0     1                 .L0 
     8828     8828        0     1                 .L0 
-    882e     882e        0     1                 .L0 
-    882e     882e        0     1                 .L0 
-    882e     882e        0     1                 .L0 
-    8832     8832        0     1                 .L0 
-    883c     883c        0     1                 .L0 
+    8830     8830        0     1                 .L0 
+    8834     8834        0     1                 .L0 
+    8836     8836        0     1                 .L0 
+    883a     883a        0     1                 .L0 
+    883e     883e        0     1                 .L0 
+    883e     883e        0     1                 .L0 
     8840     8840        0     1                 .L0 
-    8844     8844        0     1                 .L0 
-    8844     8844        0     1                 .L0 
-    884c     884c        0     1                 .L0 
-    8854     8854        0     1                 .L0 
-    8856     8856        0     1                 .L0 
+    8842     8842        0     1                 .L0 
+    8842     8842        0     1                 .L0 
+    8842     8842        0     1                 .L0 
+    8842     8842       5e     2 .text.aes128_ecb_encrypt
+    8842     8842       5e     2         main.o:(.text.aes128_ecb_encrypt)
+    8842     8842        0     1                 .L0 
+    8842     8842        0     1                 .L0 
+    8842     8842        0     1                 $x
+    8842     8842        0     1                 .L0 
+    8842     8842       5e     1                 aes128_ecb_encrypt
+    8858     8858        0     1                 .L0 
+    885a     885a        0     1                 .L0 
+    885c     885c        0     1                 .L0 
     885e     885e        0     1                 .L0 
+    8860     8860        0     1                 .L0 
     8862     8862        0     1                 .L0 
     8862     8862        0     1                 .L0 
-    8862     8862       40     2 .text.aes128_ecb_encrypt
-    8862     8862       40     2         main.o:(.text.aes128_ecb_encrypt)
-    8862     8862        0     1                 .L0 
-    8862     8862        0     1                 .L0 
-    8862     8862        0     1                 $x
-    8862     8862        0     1                 .L0 
-    8862     8862       40     1                 aes128_ecb_encrypt
-    886e     886e        0     1                 .L0 
-    8870     8870        0     1                 .L0 
-    8872     8872        0     1                 .L0 
-    8874     8874        0     1                 .L0 
+    8868     8868        0     1                 .L0 
+    8868     8868        0     1                 .L0 
+    886a     886a        0     1                 .L0 
+    886c     886c        0     1                 .L0 
+    886c     886c        0     1                 .L0 
+    886c     886c        0     1                 .L0 
     8876     8876        0     1                 .L0 
-    8878     8878        0     1                 .L0 
-    8878     8878        0     1                 .L0 
+    8876     8876        0     1                 .L0 
+    887a     887a        0     1                 .L0 
     887e     887e        0     1                 .L0 
-    887e     887e        0     1                 .L0 
-    8880     8880        0     1                 .L0 
     8882     8882        0     1                 .L0 
     8882     8882        0     1                 .L0 
-    8882     8882        0     1                 .L0 
-    8886     8886        0     1                 .L0 
-    888a     888a        0     1                 .L0 
-    888e     888e        0     1                 .L0 
-    888e     888e        0     1                 .L0 
-    8890     8890        0     1                 .L0 
+    8884     8884        0     1                 .L0 
+    8888     8888        0     1                 .L0 
+    8888     8888        0     1                 .L0 
+    8888     8888        0     1                 .L0 
     8894     8894        0     1                 .L0 
-    8894     8894        0     1                 .L0 
-    8894     8894        0     1                 .L0 
-    889a     889a        0     1                 .L0 
-    889e     889e        0     1                 .L0 
+    889c     889c        0     1                 .L0 
+    88a0     88a0        0     1                 .L0 
+    88a0     88a0        0     1                 .L0 
+    88a0     88a0        4     2 .text.write_to_address
+    88a0     88a0        4     2         main.o:(.text.write_to_address)
+    88a0     88a0        0     1                 .L0 
+    88a0     88a0        0     1                 .L0 
+    88a0     88a0        0     1                 $x
+    88a0     88a0        0     1                 .L0 
+    88a0     88a0        4     1                 write_to_address
     88a2     88a2        0     1                 .L0 
-    88a2     88a2        0     1                 .L0 
-    88a2     88a2        4     2 .text.write_to_address
-    88a2     88a2        4     2         main.o:(.text.write_to_address)
-    88a2     88a2        0     1                 .L0 
-    88a2     88a2        0     1                 .L0 
-    88a2     88a2        0     1                 $x
-    88a2     88a2        0     1                 .L0 
-    88a2     88a2        4     1                 write_to_address
     88a4     88a4        0     1                 .L0 
-    88a6     88a6        0     1                 .L0 
-    88a6     88a6       12     2 .text.write_v_to_address
-    88a6     88a6       12     2         main.o:(.text.write_v_to_address)
-    88a6     88a6        0     1                 .L0 
-    88a6     88a6        0     1                 .L0 
-    88a6     88a6        0     1                 $x
-    88a6     88a6        0     1                 .L0 
-    88a6     88a6       12     1                 write_v_to_address
+    88a4     88a4       12     2 .text.write_v_to_address
+    88a4     88a4       12     2         main.o:(.text.write_v_to_address)
+    88a4     88a4        0     1                 .L0 
+    88a4     88a4        0     1                 .L0 
+    88a4     88a4        0     1                 $x
+    88a4     88a4        0     1                 .L0 
+    88a4     88a4       12     1                 write_v_to_address
+    88a8     88a8        0     1                 .L0 
+    88a8     88a8        0     1                 .L0 
     88aa     88aa        0     1                 .L0 
     88aa     88aa        0     1                 .L0 
     88ac     88ac        0     1                 .L0 
-    88ac     88ac        0     1                 .L0 
-    88ae     88ae        0     1                 .L0 
-    88b2     88b2        0     1                 .L0 
+    88b0     88b0        0     1                 .L0 
+    88b4     88b4        0     1                 .L0 
+    88b4     88b4        0     1                 .L0 
     88b6     88b6        0     1                 .L0 
     88b6     88b6        0     1                 .L0 
-    88b8     88b8        0     1                 .L0 
-    88b8     88b8        0     1                 .L0 
-    88b8     88b8       be     2 .text.main
-    88b8     88b8       be     2         main.o:(.text.main)
-    88b8     88b8        0     1                 .L0 
-    88b8     88b8        0     1                 .L0 
-    88b8     88b8        0     1                 $x
-    88b8     88b8        0     1                 .L0 
-    88b8     88b8       be     1                 main
-    88c2     88c2        0     1                 .L0 
-    88c6     88c6        0     1                 .L0 
-    88e0     88e0        0     1                 .L0 
-    88e0     88e0        0     1                 .L0 
-    88f0     88f0        0     1                 .L0 
-    88f0     88f0        0     1                 .L0 
-    88fc     88fc        0     1                 .L0 
-    88fc     88fc        0     1                 .L0 
-    8900     8900        0     1                 .L0 
-    8904     8904        0     1                 .L0 
-    8904     8904        0     1                 .L0 
+    88b6     88b6       be     2 .text.main
+    88b6     88b6       be     2         main.o:(.text.main)
+    88b6     88b6        0     1                 .L0 
+    88b6     88b6        0     1                 .L0 
+    88b6     88b6        0     1                 $x
+    88b6     88b6        0     1                 .L0 
+    88b6     88b6       be     1                 main
+    88c0     88c0        0     1                 .L0 
+    88c4     88c4        0     1                 .L0 
+    88de     88de        0     1                 .L0 
+    88de     88de        0     1                 .L0 
+    88ee     88ee        0     1                 .L0 
+    88ee     88ee        0     1                 .L0 
+    88fa     88fa        0     1                 .L0 
+    88fa     88fa        0     1                 .L0 
+    88fe     88fe        0     1                 .L0 
+    8902     8902        0     1                 .L0 
+    8902     8902        0     1                 .L0 
+    890e     890e        0     1                 .L0 
+    890e     890e        0     1                 .L0 
     8910     8910        0     1                 .L0 
     8910     8910        0     1                 .L0 
-    8912     8912        0     1                 .L0 
-    8912     8912        0     1                 .L0 
+    8914     8914        0     1                 .L0 
+    8914     8914        0     1                 .L0 
     8916     8916        0     1                 .L0 
     8916     8916        0     1                 .L0 
-    8918     8918        0     1                 .L0 
-    8918     8918        0     1                 .L0 
+    891a     891a        0     1                 .L0 
+    891a     891a        0     1                 .L0 
     891c     891c        0     1                 .L0 
     891c     891c        0     1                 .L0 
-    891e     891e        0     1                 .L0 
-    891e     891e        0     1                 .L0 
+    8920     8920        0     1                 .L0 
+    8920     8920        0     1                 .L0 
     8922     8922        0     1                 .L0 
     8922     8922        0     1                 .L0 
-    8924     8924        0     1                 .L0 
-    8924     8924        0     1                 .L0 
-    892c     892c        0     1                 .L0 
-    8930     8930        0     1                 .L0 
-    8930     8930        0     1                 .L0 
-    893c     893c        0     1                 .L0 
-    893c     893c        0     1                 .L0 
-    8940     8940        0     1                 .L0 
-    8940     8940        0     1                 .L0 
-    8940     8940        0     1                 .L0 
-    8944     8944        0     1                 .L0 
-    8948     8948        0     1                 .L0 
-    8948     8948        0     1                 .L0 
+    892a     892a        0     1                 .L0 
+    892e     892e        0     1                 .L0 
+    892e     892e        0     1                 .L0 
+    893a     893a        0     1                 .L0 
+    893a     893a        0     1                 .L0 
+    893e     893e        0     1                 .L0 
+    893e     893e        0     1                 .L0 
+    893e     893e        0     1                 .L0 
+    8942     8942        0     1                 .L0 
+    8946     8946        0     1                 .L0 
+    8946     8946        0     1                 .L0 
+    894a     894a        0     1                 .L0 
+    894a     894a        0     1                 .L0 
     894c     894c        0     1                 .L0 
-    894c     894c        0     1                 .L0 
-    894e     894e        0     1                 .L0 
+    8950     8950        0     1                 .L0 
+    8952     8952        0     1                 .L0 
     8952     8952        0     1                 .L0 
     8954     8954        0     1                 .L0 
     8954     8954        0     1                 .L0 
-    8956     8956        0     1                 .L0 
-    8956     8956        0     1                 .L0 
-    8956     8956        0     1                 .L0 
-    895e     895e        0     1                 .L0 
-    895e     895e        0     1                 .L0 
-    8966     8966        0     1                 .L0 
+    8954     8954        0     1                 .L0 
+    895c     895c        0     1                 .L0 
+    895c     895c        0     1                 .L0 
+    8964     8964        0     1                 .L0 
+    8964     8964        0     1                 .L0 
     8966     8966        0     1                 .L0 
     8968     8968        0     1                 .L0 
-    896a     896a        0     1                 .L0 
-    8972     8972        0     1                 .L0 
-    8976     8976        0     1                 .L0 
-    8976     8976        0     1                 .L0 
+    8970     8970        0     1                 .L0 
+    8974     8974        0     1                 .L0 
+    8974     8974        0     1                 .L0 
   100000   100000      13a     1 .rodata
   100000   100000        0     1         . = ALIGN(4)
   100000   100000      100     1         main.o:(.rodata.sbox)
@@ -1153,7 +1128,7 @@
   10013c   10013c        0     1 .bss
   10013c   10013c        0     1         . = ALIGN(4)
   10013c   10013c        0     1         _end = .
-       0        0      3da     1 .debug_abbrev
+       0        0      44a     1 .debug_abbrev
        0        0       31     1         include/exceptions.o:(.debug_abbrev)
        0        0        0     1                 $d
       31       31       31     1         include/int.o:(.debug_abbrev)
@@ -1162,12 +1137,12 @@
       62       62        0     1                 $d
      124      124       cf     1         include/utils.o:(.debug_abbrev)
      124      124        0     1                 $d
-     1f3      1f3      1c8     1         main.o:(.debug_abbrev)
+     1f3      1f3      238     1         main.o:(.debug_abbrev)
      1f3      1f3        0     1                 $d
-     3bb      3bb       1f     1         crt0.riscv.o:(.debug_abbrev)
-     3bb      3bb        0     1                 .L0 
-     3bb      3bb        0     1                 $d
-       0        0      ce4     1 .debug_info
+     42b      42b       1f     1         crt0.riscv.o:(.debug_abbrev)
+     42b      42b        0     1                 .L0 
+     42b      42b        0     1                 $d
+       0        0      c92     1 .debug_info
        0        0       49     1         include/exceptions.o:(.debug_info)
        0        0        0     1                 $d
       49       49       8b     1         include/int.o:(.debug_info)
@@ -1176,11 +1151,11 @@
       d4       d4        0     1                 $d
      29c      29c       a8     1         include/utils.o:(.debug_info)
      29c      29c        0     1                 $d
-     344      344      70b     1         main.o:(.debug_info)
+     344      344      6b9     1         main.o:(.debug_info)
      344      344        0     1                 $d
-     a4f      a4f      295     1         crt0.riscv.o:(.debug_info)
-     a4f      a4f        0     1                 .L0 
-     a4f      a4f        0     1                 $d
+     9fd      9fd      295     1         crt0.riscv.o:(.debug_info)
+     9fd      9fd        0     1                 .L0 
+     9fd      9fd        0     1                 $d
        0        0      116     1 .debug_rnglists
        0        0       1a     1         include/exceptions.o:(.debug_rnglists)
        0        0        0     1                 $d
@@ -1200,7 +1175,7 @@
       fb       fb       1b     1         crt0.riscv.o:(.debug_rnglists)
       fb       fb        0     1                 $d
      107      107        0     1                 .L0 
-       0        0      1e4     1 .debug_str_offsets
+       0        0      1fc     1 .debug_str_offsets
        0        0       20     1         include/exceptions.o:(.debug_str_offsets)
        0        0        0     1                 $d
        8        8        0     1                 .L0 
@@ -1213,12 +1188,12 @@
       ec       ec       2c     1         include/utils.o:(.debug_str_offsets)
       ec       ec        0     1                 $d
       f4       f4        0     1                 .L0 
-     118      118       cc     1         main.o:(.debug_str_offsets)
+     118      118       e4     1         main.o:(.debug_str_offsets)
      118      118        0     1                 $d
      120      120        0     1                 .L0 
-       0        0      3a9     1 .debug_str
-       0        0      3a9     1         <internal>:(.debug_str)
-       0        0      12c     1 .debug_addr
+       0        0      3f0     1 .debug_str
+       0        0      3f0     1         <internal>:(.debug_str)
+       0        0      118     1 .debug_addr
        0        0       14     1         include/exceptions.o:(.debug_addr)
        0        0        0     1                 $d
        8        8        0     1                 .L0 
@@ -1231,14 +1206,14 @@
       60       60       18     1         include/utils.o:(.debug_addr)
       60       60        0     1                 $d
       68       68        0     1                 .L0 
-      78       78       b4     1         main.o:(.debug_addr)
+      78       78       a0     1         main.o:(.debug_addr)
       78       78        0     1                 $d
       80       80        0     1                 .L0 
        0        0       71     1 .comment
        0        0       71     1         <internal>:(.comment)
-       0        0       50     1 .riscv.attributes
-       0        0       50     1         <internal>:(.riscv.attributes)
-       0        0      2fc     4 .debug_frame
+       0        0       58     1 .riscv.attributes
+       0        0       58     1         <internal>:(.riscv.attributes)
+       0        0      2e0     4 .debug_frame
        0        0       44     4         include/exceptions.o:(.debug_frame)
        0        0        0     1                 .L0 
        0        0        0     1                 $d
@@ -1251,10 +1226,10 @@
      16c      16c       4c     4         include/utils.o:(.debug_frame)
      16c      16c        0     1                 .L0 
      16c      16c        0     1                 $d
-     1b8      1b8      144     4         main.o:(.debug_frame)
+     1b8      1b8      128     4         main.o:(.debug_frame)
      1b8      1b8        0     1                 .L0 
      1b8      1b8        0     1                 $d
-       0        0     14d9     1 .debug_line
+       0        0     1429     1 .debug_line
        0        0       82     1         include/exceptions.o:(.debug_line)
        0        0        0     1                 .Lline_table_start0
        0        0        0     1                 $d
@@ -1267,22 +1242,22 @@
      3c9      3c9       c3     1         include/utils.o:(.debug_line)
      3c9      3c9        0     1                 .Lline_table_start0
      3c9      3c9        0     1                 $d
-     48c      48c      b71     1         main.o:(.debug_line)
+     48c      48c      ac1     1         main.o:(.debug_line)
      48c      48c        0     1                 .Lline_table_start0
      48c      48c        0     1                 $d
-     ffd      ffd      4dc     1         crt0.riscv.o:(.debug_line)
-     ffd      ffd        0     1                 .Lline_table_start0
-     ffd      ffd        0     1                 $d
+     f4d      f4d      4dc     1         crt0.riscv.o:(.debug_line)
+     f4d      f4d        0     1                 .Lline_table_start0
+     f4d      f4d        0     1                 $d
        0        0      139     1 .debug_line_str
        0        0      139     1         <internal>:(.debug_line_str)
-       0        0      686     1 .debug_loclists
+       0        0      65b     1 .debug_loclists
        0        0      115     1         include/tcutils.o:(.debug_loclists)
        0        0        0     1                 $d
        c        c        0     1                 .L0 
      115      115       1f     1         include/utils.o:(.debug_loclists)
      115      115        0     1                 $d
      121      121        0     1                 .L0 
-     134      134      552     1         main.o:(.debug_loclists)
+     134      134      527     1         main.o:(.debug_loclists)
      134      134        0     1                 $d
      140      140        0     1                 .L0 
        0        0       28     1 .debug_aranges

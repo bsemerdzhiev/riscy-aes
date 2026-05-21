@@ -83,7 +83,7 @@ always_comb begin
   case(bs)
     2'd0: begin
       if (direction == '0) begin
-        result = {results_enc[0], col, col, results_enc[1]};
+        result = {results_enc[1], col, col, results_enc[0]};
       end else begin
         result = {results_dec[0], results_dec[1], results_dec[2], results_dec[3]};
       end
@@ -91,7 +91,7 @@ always_comb begin
 
     2'd1: begin
       if (direction == '0) begin
-        result = {results_enc[1], results_enc[0], col, col};
+        result = {col, col, results_enc[0], results_enc[1]};
       end else begin
         result = {results_dec[3], results_dec[0], results_dec[1], results_dec[2]};
       end
@@ -99,7 +99,7 @@ always_comb begin
 
     2'd2: begin
       if (direction == '0) begin
-        result = {col, results_enc[1], results_enc[0], col};
+        result = {col, results_enc[0], results_enc[1], col};
       end else begin
         result = {results_dec[2], results_dec[3], results_dec[0], results_dec[1]};
       end
@@ -107,7 +107,7 @@ always_comb begin
 
     2'd3: begin
       if (direction == '0) begin
-        result = {col, col, results_enc[1], results_enc[0]};
+        result = {results_enc[0], results_enc[1], col, col};
       end else begin
         result = {results_dec[1], results_dec[2], results_dec[3], results_dec[0]};
       end
