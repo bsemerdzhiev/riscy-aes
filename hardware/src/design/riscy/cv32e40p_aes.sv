@@ -79,7 +79,7 @@ gf_mult u_col_four_dec (.a(8'h09), .b(col), .result(results_dec[3]));
 
 always_comb begin
   result = 32'h0;
-
+/*
   case(bs)
     2'd0: begin
       if (direction == '0) begin
@@ -113,6 +113,14 @@ always_comb begin
       end
     end
   endcase
+  */
+  if (direction == '0) begin
+        result = {results_enc[1], col, col, results_enc[0]};
+  end else begin
+        result = {results_dec[0], results_dec[1], results_dec[2], results_dec[3]};
+  end
+  
+  
 end
 endmodule
 
@@ -127,7 +135,7 @@ module cv32e40p_aes
   input logic [31:0]        matrix_input_i,
   input logic [31:0]        key_i,
 
-  // 00 - esmi, 01 - esi, 10 - dsmi, 11 - dsi
+
   input crypto_op_e   chosen_op_i,
 
   //outputs
@@ -138,8 +146,12 @@ logic [5:0] shamt;
 logic [7:0] sbox_input;
 logic [7:0] sbox_output;
 
-logic [7:0] mix_columns_col_i;
+logic [7:0]  mix_columns_col_i;
 logic [31:0] mix_columns_o;
+
+logic [31:0] rotated_word;
+logic [31:0] transformed_word;
+logic [31:0] sbox_word;
 
 
 //TODO: Check why it breaks the testbench
@@ -151,12 +163,31 @@ assign direction = chosen_op_i[1];
 mix_columns mix_columns_i(.col(mix_columns_col_i), .bs(bs_i), .direction(direction), .result(mix_columns_o));
 
 //assign aes_o = (chosen_op_i == 2'b00 || chosen_op_i == 2'b10) ? (key_i ^ {24'h0, sbox_output}): (key_i ^ mix_columns_o);
-assign aes_o = chosen_op_i[0] ?
-               (key_i ^ mix_columns_o) :
-               (key_i ^ {24'h0, sbox_output});
+//assign aes_o = chosen_op_i[0] ?
+//              (key_i ^ mix_columns_o) :
+//               (key_i ^ {24'h0, sbox_output});
+
+assign sbox_word = {24'h0, sbox_output};
+
+assign transformed_word = chosen_op_i[0] ? 
+                          mix_columns_o: 
+                          sbox_word;
+
+always_comb begin
+  unique case (bs_i)
+    2'b00: rotated_word = transformed_word;
+    2'b01: rotated_word = {transformed_word[23:0], transformed_word[31:24]};
+    2'b10: rotated_word = {transformed_word[15:0], transformed_word[31:16]};
+    2'b11: rotated_word = {transformed_word[7:0],  transformed_word[31:8]};
+  endcase
+end
+
+assign aes_o = key_i ^ rotated_word;
+
+
                
 always_comb begin
-  shamt = {1'b0, bs_i, 3'b0};
+  shamt = {bs_i, 3'b0};
   sbox_input = matrix_input_i[shamt +: 8];
 
   mix_columns_col_i = 0;
