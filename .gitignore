@@ -1,4 +1,5 @@
 vivado
+*.str
 *.jou
 *.log
 .Xil

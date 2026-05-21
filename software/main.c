@@ -328,6 +328,11 @@ void write_v_to_address(uintptr_t addr, uint8_t vector[16]) {
   }
 }
 
+void write_numb_to_address(uintptr_t addr, uint8_t vector[16]) {
+  uint32_t *vector_word = (uint32_t *)vector;
+  write_to_address(addr, vector_word[0]);
+}
+
 int main() {
   // Plaintext: "Hello, World!000" (16 bytes, 1 block)
   uint8_t plaintext[16] = {'H', 'e', 'l', 'l', 'o', ',', ' ', 'W',
@@ -351,6 +356,22 @@ int main() {
 
   addr = 0x0100000 + 0x2000 + 0x40;
   write_v_to_address(addr, ciphertext);
+
+  addr = 0x0100000 + 0x2000 + 0x50;
+
+  uint8_t res_from_aes32esmi[16];
+  uint32_t *aes32esmi_ptr = (uint32_t *)res_from_aes32esmi;
+
+  uint32_t chosen_byte = 0;
+
+  aes32esmi_ptr[0] = 0xe7aeaa00;
+  chosen_byte = 0xa8c81b9f;
+
+  __asm__ volatile("aes32esmi %0, %1, %2, %3"
+                   : "+r"(aes32esmi_ptr[0])
+                   : "r"(aes32esmi_ptr[0]), "r"(chosen_byte), "I"(1));
+
+  write_numb_to_address(addr, res_from_aes32esmi);
 
   // Check if calculated and expected match:
   addr = 0x0100000 + 0x2000 +

@@ -172,6 +172,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   logic       mult_int_en;
   logic       mult_dot_en;
   logic       apu_en;
+  logic       crypto_en;
 
   // this instruction needs floating-point rounding-mode verification
   logic check_fprm;
@@ -296,7 +297,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
     dret_dec_o                  = 1'b0;
     
     ///////////////////////////////////
-    crypto_en_o       = 1'b0;
+    crypto_en       = 1'b0;
     crypto_operator_o = AES32_ESI; //good to have a default value
     crypto_bs_o       = 2'b00;
     ///////////////////////////////////
@@ -625,10 +626,13 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
         regfile_alu_we = 1'b1;
         rega_used_o    = 1'b1;
         regb_used_o    = 1'b1;
+        regc_used_o    = 1'b1;
         
-        crypto_en_o    = 1'b1;
+        crypto_en    = 1'b1;
         alu_en         = 1'b0;
         crypto_bs_o    = instr_rdata_i[31:30];
+
+        regc_mux_o            = REGC_RD;
         
         alu_op_a_mux_sel_o = OP_A_REGA_OR_FWD;
         alu_op_b_mux_sel_o = OP_B_REGB_OR_FWD;
@@ -3037,6 +3041,8 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
 
   // deassert we signals (in case of stalls)
   assign alu_en_o                    = (deassert_we_i) ? 1'b0          : alu_en;
+  assign crypto_en_o                 = (deassert_we_i) ? 1'b0          : crypto_en;
+
   assign apu_en_o                    = (deassert_we_i) ? 1'b0          : apu_en;
   assign mult_int_en_o               = (deassert_we_i) ? 1'b0          : mult_int_en;
   assign mult_dot_en_o               = (deassert_we_i) ? 1'b0          : mult_dot_en;

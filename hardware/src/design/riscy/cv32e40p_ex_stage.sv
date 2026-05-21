@@ -285,9 +285,9 @@ module cv32e40p_ex_stage
   
   cv32e40p_aes aes_i (
     .bs_i(aes_bs_i),
-    .matrix_input_i(aes_operand_a_i),
-    .key_i(aes_operand_b_i),
-    .chosen_op_i(aes_bs_i),
+    .matrix_input_i(aes_operand_b_i),
+    .key_i(aes_operand_a_i),
+    .chosen_op_i(aes_operator_i),
     .aes_o(aes_result)
   );
 
@@ -332,8 +332,8 @@ module cv32e40p_ex_stage
 
   generate
     if (FPU == 1) begin : gen_apu
-      ////////////////////////////////////////////////////
       //     _    ____  _   _   ____ ___ ____  ____     //
+      ////////////////////////////////////////////////////
       //    / \  |  _ \| | | | |  _ \_ _/ ___||  _ \    //
       //   / _ \ | |_) | | | | | | | | |\___ \| |_) |   //
       //  / ___ \|  __/| |_| | | |_| | | ___) |  __/    //
@@ -441,7 +441,7 @@ module cv32e40p_ex_stage
   // depend on ex_ready.
   assign ex_ready_o = (~apu_stall & alu_ready & mult_ready & lsu_ready_ex_i
                        & wb_ready_i & ~wb_contention) | (branch_in_ex_i);
-  assign ex_valid_o = (apu_valid | alu_en_i | mult_en_i | csr_access_i | lsu_en_i)
+  assign ex_valid_o = (apu_valid | alu_en_i | aes_en_i | mult_en_i | csr_access_i | lsu_en_i)
                        & (alu_ready & mult_ready & lsu_ready_ex_i & wb_ready_i);
 
 endmodule
