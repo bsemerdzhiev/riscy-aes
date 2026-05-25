@@ -150,6 +150,14 @@ module cv32e40p_id_stage
     output logic                 apu_perf_dep_o,
     input  logic                 apu_busy_i,
     input  logic [C_RM-1:0]      frm_i,
+    
+    // new AES outputs to eecutio ////////////////////////////////////////////////////////////////////////
+    output logic        crypto_en_ex_o,
+    output crypto_op_e  crypto_operator_ex_o,
+    output logic [31:0] crypto_operand_a_ex_o,
+    output logic [31:0] crypto_operand_b_ex_o,
+    output logic [1:0]  crypto_bs_ex_o,
+    /////////////////////////////////////////////////////////////////////////////////////////////////
 
     // CSR ID/EX
     output logic              csr_access_ex_o,
@@ -360,6 +368,11 @@ module cv32e40p_id_stage
   logic [0:0] imm_a_mux_sel;
   logic [3:0] imm_b_mux_sel;
   logic [1:0] ctrl_transfer_target_mux_sel;
+  
+  // new AES Control/////////////////////////////////////////////////////////////////////////////////////////
+  logic       crypto_en;
+  crypto_op_e crypto_operator;
+  logic [1:0] crypto_bs;
 
   // Multiplier Control
   mul_opcode_e mult_operator;  // multiplication operation selection
@@ -606,7 +619,7 @@ module cv32e40p_id_stage
       OP_A_REGC_OR_FWD: alu_operand_a = operand_c_fw_id;
       OP_A_CURRPC:      alu_operand_a = pc_id_i;
       OP_A_IMM:         alu_operand_a = imm_a;
-      default:          alu_operand_a = operand_a_fw_id;
+      default:          alu_operand_a = operand_a_fw_id;    // we aim for the default or OP_A_REGA_OR_FWD in aes
     endcase
     ;  // case (alu_op_a_mux_sel)
   end
@@ -621,9 +634,9 @@ module cv32e40p_id_stage
   // Operand a forwarding mux
   always_comb begin : operand_a_fw_mux
     case (operand_a_fw_mux_sel)
-      SEL_FW_EX:   operand_a_fw_id = regfile_alu_wdata_fw_i;
-      SEL_FW_WB:   operand_a_fw_id = regfile_wdata_wb_i;
-      SEL_REGFILE: operand_a_fw_id = regfile_data_ra_id;
+      SEL_FW_EX:   operand_a_fw_id = regfile_alu_wdata_fw_i;   // rs1 is being produced by instruction currently in EX
+      SEL_FW_WB:   operand_a_fw_id = regfile_wdata_wb_i;       // rs1 is being written back by instruction currently in WB
+      SEL_REGFILE: operand_a_fw_id = regfile_data_ra_id;       // rs1 is already valid in register file
       default:     operand_a_fw_id = regfile_data_ra_id;
     endcase
     ;  // case (operand_a_fw_mux_sel)
@@ -1027,7 +1040,12 @@ module cv32e40p_id_stage
       .apu_op_o     (apu_op),
       .apu_lat_o    (apu_lat),
       .fp_rnd_mode_o(fp_rnd_mode),
-
+      
+      // new AES signals /////////////////////////////////////////////////////////////////////////////////////
+      .crypto_en_o        (crypto_en),
+      .crypto_operator_o  (crypto_operator),
+      .crypto_bs_o        (crypto_bs),
+      
       // Register file control signals
       .regfile_mem_we_o       (regfile_we_id),
       .regfile_alu_we_o       (regfile_alu_we_id),
@@ -1408,6 +1426,15 @@ module cv32e40p_id_stage
       alu_operand_a_ex_o     <= '0;
       alu_operand_b_ex_o     <= '0;
       alu_operand_c_ex_o     <= '0;
+      
+      ////////////////////////////////////////////////////////////////////////////////////
+      crypto_en_ex_o           <= 1'b0;
+      crypto_operator_ex_o     <= AES32_ESI;
+      crypto_bs_ex_o           <= 2'b00;
+      crypto_operand_a_ex_o    <= '0;
+      crypto_operand_b_ex_o    <= '0;
+      ////////////////////////////////////////////////////////////////////////////////////
+      
       bmask_a_ex_o           <= '0;
       bmask_b_ex_o           <= '0;
       imm_vec_ext_ex_o       <= '0;
@@ -1504,6 +1531,16 @@ module cv32e40p_id_stage
           alu_clpx_shift_ex_o <= instr[14:13];
           alu_is_subrot_ex_o  <= is_subrot;
         end
+        
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+        crypto_en_ex_o <= crypto_en;
+        if (crypto_en) begin
+          crypto_operator_ex_o    <= crypto_operator;
+          crypto_bs_ex_o          <= crypto_bs;
+          crypto_operand_a_ex_o   <= alu_operand_a;  //forwarded rs1
+          crypto_operand_b_ex_o   <= alu_operand_b;  //forwarded rs2
+        end
+        ////////////////////////////////////////////////////////////////////////////////////////////////
 
         mult_en_ex_o <= mult_en;
         if (mult_int_en) begin
@@ -1515,6 +1552,8 @@ module cv32e40p_id_stage
           mult_operand_c_ex_o   <= alu_operand_c;
           mult_imm_ex_o         <= mult_imm_id;
         end
+        
+       
         if (mult_dot_en) begin
           mult_operator_ex_o   <= mult_operator;
           mult_dot_signed_ex_o <= mult_dot_signed;
@@ -1595,6 +1634,8 @@ module cv32e40p_id_stage
         mult_en_ex_o         <= 1'b0;
 
         alu_en_ex_o          <= 1'b1;
+        
+        crypto_en_ex_o       <= 1'b0; ////////////////////////////////////////////////////////////////////////
 
       end else if (csr_access_ex_o) begin
         //In the EX stage there was a CSR access, to avoid multiple
@@ -1686,7 +1727,7 @@ module cv32e40p_id_stage
   // and that EX stage is ready to receive flushed instruction immediately
   property p_branch_taken_ex;
     @(posedge clk) disable iff (!rst_n) (branch_taken_ex == 1'b1) |-> ((ex_ready_i == 1'b1) &&
-                                                                          (alu_en == 1'b0) && (apu_en == 1'b0) &&
+                                                                          (alu_en == 1'b0) && (apu_en == 1'b0) && (crypto_en == 1'b0) && //////////////////////////////////// add crypto
                                                                           (mult_en == 1'b0) && (mult_int_en == 1'b0) &&
                                                                           (mult_dot_en == 1'b0) && (regfile_we_id == 1'b0) &&
                                                                           (regfile_alu_we_id == 1'b0) && (data_req_id == 1'b0));
@@ -1797,7 +1838,7 @@ module cv32e40p_id_stage
   property p_illegal_2;
     @(posedge clk) disable iff (!rst_n) (illegal_insn_dec == 1'b1) |-> !(ebrk_insn_dec || mret_insn_dec || uret_insn_dec || dret_insn_dec ||
                                                                             ecall_insn_dec || wfi_insn_dec || fencei_insn_dec ||
-                                                                            alu_en || mult_int_en || mult_dot_en || apu_en ||
+                                                                            alu_en || mult_int_en || mult_dot_en || apu_en || crypto_en || ////////////////////////////////////////////////////
                                                                             regfile_we_id || regfile_alu_we_id ||
                                                                             csr_op != CSR_OP_READ || data_req_id);
   endproperty

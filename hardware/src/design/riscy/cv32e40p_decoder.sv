@@ -150,7 +150,12 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   output logic [1:0]  ctrl_transfer_target_mux_sel_o,        // jump target selection
 
   // HPM related control signals
-  input  logic [31:0] mcounteren_i
+  input  logic [31:0] mcounteren_i,
+  
+  // CRYPTO
+  output logic                crypto_en_o,         // enable signal for the NEW crypto/AES module
+  output crypto_op_e          crypto_operator_o,   // selector of 1 of the 4 AES instructions
+  output logic [1:0]          crypto_bs_o          // byte selector
 );
 
   // write enable/request control
@@ -167,6 +172,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   logic       mult_int_en;
   logic       mult_dot_en;
   logic       apu_en;
+  logic       crypto_en;
 
   // this instruction needs floating-point rounding-mode verification
   logic check_fprm;
@@ -176,7 +182,16 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   logic                      fpu_vec_op; // fpu vectorial operation
   // unittypes for latencies to help us decode for APU
   enum logic[1:0] {ADDMUL, DIVSQRT, NONCOMP, CONV} fp_op_group;
-
+  
+  ////////////////////////////////////////////           Is the incomming instruction of AES32 TYPE, combinational logic
+  logic is_aes32;
+  assign is_aes32 =
+  (instr_rdata_i[6:0]   == OPCODE_OP) &&
+  (instr_rdata_i[14:12] == 3'b000) &&
+  (instr_rdata_i[29]    == 1'b1) &&
+  (instr_rdata_i[25]    == 1'b1) &&
+  (instr_rdata_i[28:26] inside {3'b000, 3'b001, 3'b010, 3'b011});
+  ////////////////////////////////////////////
 
   /////////////////////////////////////////////
   //   ____                     _            //
@@ -280,6 +295,12 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
     mret_dec_o                  = 1'b0;
     uret_dec_o                  = 1'b0;
     dret_dec_o                  = 1'b0;
+    
+    ///////////////////////////////////
+    crypto_en       = 1'b0;
+    crypto_operator_o = AES32_ESI; //good to have a default value
+    crypto_bs_o       = 2'b00;
+    ///////////////////////////////////
 
     unique case (instr_rdata_i[6:0])
 
@@ -599,7 +620,35 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
       end
 
       OPCODE_OP: begin  // Register-Register ALU operation
+       //////////////////////////////////////////////////////////////////////
+       if(is_aes32) begin
+       
+        regfile_alu_we = 1'b1;
+        rega_used_o    = 1'b1;
+        regb_used_o    = 1'b1;
+        regc_used_o    = 1'b1;
+        
+        crypto_en    = 1'b1;
+        alu_en         = 1'b0;
+        crypto_bs_o    = instr_rdata_i[31:30];
 
+        regc_mux_o            = REGC_RD;
+        
+        alu_op_a_mux_sel_o = OP_A_REGA_OR_FWD;
+        alu_op_b_mux_sel_o = OP_B_REGB_OR_FWD;
+        
+        unique case(instr_rdata_i[28:26])
+          
+          3'b000: crypto_operator_o = AES32_ESI;
+          3'b001: crypto_operator_o = AES32_ESMI;
+          3'b010: crypto_operator_o = AES32_DSI;
+          3'b011: crypto_operator_o = AES32_DSMI;
+          default: illegal_insn_o   = 1'b1;
+          
+        endcase
+       end 
+       else begin   
+       //////////////////////////////////////////////////////////////////////
         // PREFIX 11
         if (instr_rdata_i[31:30] == 2'b11) begin
           if (PULP_XPULP) begin
@@ -1388,7 +1437,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
           endcase
         end
       end
-
+     end 
       ////////////////////////////
       //  ______ _____  _    _  //
       // |  ____|  __ \| |  | | //
@@ -2992,6 +3041,8 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
 
   // deassert we signals (in case of stalls)
   assign alu_en_o                    = (deassert_we_i) ? 1'b0          : alu_en;
+  assign crypto_en_o                 = (deassert_we_i) ? 1'b0          : crypto_en;
+
   assign apu_en_o                    = (deassert_we_i) ? 1'b0          : apu_en;
   assign mult_int_en_o               = (deassert_we_i) ? 1'b0          : mult_int_en;
   assign mult_dot_en_o               = (deassert_we_i) ? 1'b0          : mult_dot_en;

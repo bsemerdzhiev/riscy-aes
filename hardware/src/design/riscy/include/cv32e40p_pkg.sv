@@ -36,7 +36,7 @@ package cv32e40p_pkg;
 
   parameter OPCODE_SYSTEM = 7'h73;
   parameter OPCODE_FENCE = 7'h0f;
-  parameter OPCODE_OP = 7'h33;
+  parameter OPCODE_OP = 7'h33;   
   parameter OPCODE_OPIMM = 7'h13;
   parameter OPCODE_STORE = 7'h23;
   parameter OPCODE_LOAD = 7'h03;
@@ -165,6 +165,16 @@ package cv32e40p_pkg;
     ALU_PCKHI = 7'b0111001
 
   } alu_opcode_e;
+  
+  ///////////////////////////////////////////////////////////////////////////////////
+  parameter CRYPTO_OP_WIDTH = 2;
+
+  typedef enum logic [CRYPTO_OP_WIDTH-1:0] {
+      AES32_ESI       = 2'b00,
+      AES32_ESMI      = 2'b01,
+      AES32_DSI       = 2'b10,
+      AES32_DSMI      = 2'b11 
+    } crypto_op_e;
 
   parameter MUL_OP_WIDTH = 3;
 
@@ -755,7 +765,7 @@ package cv32e40p_pkg;
   C_XF16ALT ? 16 :  // Xf16alt ext.
   C_XF8 ? 8 :  // Xf8 ext.
   C_XF8ALT ? 8 :  // Xf8alt ext.
-  0;  // Unused in case of no FP
+  0;  // Unused in case of no F
 
   parameter C_FFLAG = 5;
   parameter C_RM = 3;

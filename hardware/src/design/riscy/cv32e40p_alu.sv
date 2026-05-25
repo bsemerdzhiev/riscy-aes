@@ -83,6 +83,7 @@ module cv32e40p_alu
   logic        div_valid;
   logic [31:0] bmask;
 
+
   //////////////////////////////////////////////////////////////////////////////////////////
   //   ____            _   _ _   _                      _      _       _     _            //
   //  |  _ \ __ _ _ __| |_(_) |_(_) ___  _ __   ___  __| |    / \   __| | __| | ___ _ __  //
@@ -941,7 +942,6 @@ module cv32e40p_alu
       ALU_SRL, ALU_SRA,
       ALU_ROR:
       result_o = shift_result;
-
       // bit manipulation instructions
       ALU_BINS, ALU_BEXT, ALU_BEXTU: result_o = bextins_result;
 
