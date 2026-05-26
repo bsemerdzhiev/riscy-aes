@@ -116,6 +116,10 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   output logic        regfile_alu_we_o,        // write enable for 2nd regfile port
   output logic        regfile_alu_we_dec_o,    // write enable for 2nd regfile port without deassert
   output logic        regfile_alu_waddr_sel_o, // Select register write address for ALU/MUL operations
+  
+  // AES_register file signals
+  output logic        aes_mem_we_o,
+  //output logic        [4:0] aes_rd_o,
 
   // CSR manipulation
   output logic        csr_access_o,            // access to CSR
@@ -155,6 +159,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
 
   // write enable/request control
   logic       regfile_mem_we;
+  logic       aes_mem_we;
   logic       regfile_alu_we;
   logic       data_req;
   logic [2:0] hwlp_we;
@@ -538,6 +543,29 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
         end
       end
 
+
+      ////////////////////////////////////////////////////////////////////  Custom AES decoding
+      // AES_LOAD:
+      // Performs standard LSU load using I-type address generation,
+      // but redirects writeback from scalar RF to AES register file.
+      // imm - byte offset
+      // rs1 - memory base
+      // rd - AES register
+      
+      OPCODE_AES_LOAD: begin
+        data_req        = 1'b1;  //issue memory read request through LSU
+        regfile_mem_we  = 1'b0;  //disable the regular write to register 
+        rega_used_o     = 1'b1;  //use rs1 as base address operand
+        data_type_o     = 2'b00; //load full 32-bit word (LW semantics)
+         
+        aes_mem_we_o       = 1'b1;      // enable writeback to AES register block instead of general purpose register
+        alu_operator_o     = ALU_ADD;   // compute effective address = rs1 + immediate
+        alu_op_b_mux_sel_o = OP_B_IMM;  // select immediate as ALU operand B
+
+        imm_b_mux_sel_o    = IMMB_I;    // decode I-type immediate field [31:20]
+        data_sign_extension_o = 2'b00;  // disable sign extension (word loads keep full 32 bits)
+        //aes_rd_o           = instr_rdata_i[11:7];   // // Reinterpret rd field as AES register destination selector
+      end
 
       //////////////////////////
       //     _    _    _   _  //

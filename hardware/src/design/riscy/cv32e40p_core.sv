@@ -588,6 +588,9 @@ module cv32e40p_core
 
       .regfile_waddr_ex_o(regfile_waddr_ex),
       .regfile_we_ex_o   (regfile_we_ex),
+      ////////////////////////////////////////////
+      .aes_mem_we_ex_o   (aes_mem_we_ex),
+      ////////////////////////////////////////////
 
       .regfile_alu_we_ex_o   (regfile_alu_we_ex),
       .regfile_alu_waddr_ex_o(regfile_alu_waddr_ex),

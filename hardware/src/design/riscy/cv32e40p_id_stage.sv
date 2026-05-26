@@ -104,6 +104,10 @@ module cv32e40p_id_stage
 
     output logic [5:0] regfile_waddr_ex_o,
     output logic       regfile_we_ex_o,
+    
+    output logic       aes_mem_we_ex_o,  ////////////////////////////////////////////////////
+                       // not using waddr as we utilize regfile_waddr_ex_o
+    
 
     output logic [5:0] regfile_alu_waddr_ex_o,
     output logic       regfile_alu_we_ex_o,
@@ -394,6 +398,9 @@ module cv32e40p_id_stage
   // Register Write Control
   logic regfile_we_id;
   logic regfile_alu_waddr_mux_sel;
+  
+  // AES reg file
+  logic aes_mem_we_id; /////////////////////////////////////////////////////////////////////////////
 
   // Data Memory Control
   logic data_we_id;
@@ -1033,6 +1040,9 @@ module cv32e40p_id_stage
       .regfile_alu_we_o       (regfile_alu_we_id),
       .regfile_alu_we_dec_o   (regfile_alu_we_dec_id),
       .regfile_alu_waddr_sel_o(regfile_alu_waddr_mux_sel),
+      
+      .aes_mem_we_o           (aes_mem_we_id),
+
 
       // CSR control signals
       .csr_access_o      (csr_access),
@@ -1445,6 +1455,8 @@ module cv32e40p_id_stage
 
       regfile_waddr_ex_o     <= 6'b0;
       regfile_we_ex_o        <= 1'b0;
+      
+      aes_mem_we_ex_o        <= 1'b0;
 
       regfile_alu_waddr_ex_o <= 6'b0;
       regfile_alu_we_ex_o    <= 1'b0;
@@ -1540,6 +1552,10 @@ module cv32e40p_id_stage
         if (regfile_we_id) begin
           regfile_waddr_ex_o <= regfile_waddr_id;
         end
+        
+        ///////////////////////////////////////////////////////////////
+        aes_mem_we_ex_o <= aes_mem_we_id;
+        ///////////////////////////////////////////////////////////////
 
         regfile_alu_we_ex_o <= regfile_alu_we_id;
         if (regfile_alu_we_id) begin
@@ -1575,6 +1591,8 @@ module cv32e40p_id_stage
         // so we set all write enables to 0, but unstall the pipe
 
         regfile_we_ex_o      <= 1'b0;
+        
+        aes_mem_we_ex_o      <= 1'b0;/////////////////////////////
 
         regfile_alu_we_ex_o  <= 1'b0;
 

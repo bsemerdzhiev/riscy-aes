@@ -41,6 +41,8 @@ module cv32e40p_load_store_unit #(
     output logic [ 3:0] data_be_o,
     output logic [31:0] data_wdata_o,
     input  logic [31:0] data_rdata_i,
+    
+    
 
     // signals from ex stage
     input logic        data_we_ex_i,  // write enable                      -> from ex stage
@@ -55,6 +57,10 @@ module cv32e40p_load_store_unit #(
     input  logic [31:0] operand_a_ex_i,  // operand a from RF for address     -> from ex stage
     input  logic [31:0] operand_b_ex_i,  // operand b from RF for address     -> from ex stage
     input  logic        addr_useincr_ex_i,  // use a + b or just a for address   -> from ex stage
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////AES
+    output logic aes_mem_we_wb_o,
+    input logic aes_mem_we_ex_i,         // data request   -> from ex stage
 
     input  logic data_misaligned_ex_i,  // misaligned access in last ld/st   -> from ID/EX pipeline
     output logic data_misaligned_o,  // misaligned access was detected    -> to controller
@@ -104,6 +110,9 @@ module cv32e40p_load_store_unit #(
   logic [1:0] data_sign_ext_q;
   logic data_we_q;
   logic data_load_event_q;
+  
+  ////////////////////////////////////////////////////////////////////////////
+  logic aes_mem_we_q;
 
   logic [1:0] wdata_offset;  // mux control for data to be written to memory
 
@@ -188,6 +197,8 @@ module cv32e40p_load_store_unit #(
       data_sign_ext_q   <= '0;
       data_we_q         <= 1'b0;
       data_load_event_q <= 1'b0;
+      
+      aes_mem_we_q      <= 1'b0; //////////////////////////////////////////////////////////AES
     end
     else if (ctrl_update) // request was granted, we wait for rvalid and can continue to WB
     begin
@@ -196,6 +207,8 @@ module cv32e40p_load_store_unit #(
       data_sign_ext_q   <= data_sign_ext_ex_i;
       data_we_q         <= data_we_ex_i;
       data_load_event_q <= data_load_event_ex_i;
+      
+      aes_mem_we_q      <= aes_mem_we_ex_i; //////////////////////////////////////////////AES
     end
   end
 
