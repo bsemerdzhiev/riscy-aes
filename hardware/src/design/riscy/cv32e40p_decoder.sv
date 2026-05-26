@@ -119,7 +119,6 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   
   // AES_register file signals
   output logic        aes_mem_we_o,
-  //output logic        [4:0] aes_rd_o,
 
   // CSR manipulation
   output logic        csr_access_o,            // access to CSR
@@ -229,6 +228,8 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
     fpu_int_fmt_o               = fpnew_pkg::INT32;
     check_fprm                  = 1'b0;
     fp_op_group                 = ADDMUL;
+
+    aes_mem_we                  = 1'b0;
 
     regfile_mem_we              = 1'b0;
     regfile_alu_we              = 1'b0;
@@ -554,7 +555,6 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
       
       OPCODE_AES_LOAD: begin
         data_req        = 1'b1;  //issue memory read request through LSU
-        regfile_mem_we  = 1'b0;  //disable the regular write to register 
         rega_used_o     = 1'b1;  //use rs1 as base address operand
         data_type_o     = 2'b00; //load full 32-bit word (LW semantics)
          
@@ -564,7 +564,20 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
 
         imm_b_mux_sel_o    = IMMB_I;    // decode I-type immediate field [31:20]
         data_sign_extension_o = 2'b00;  // disable sign extension (word loads keep full 32 bits)
-        //aes_rd_o           = instr_rdata_i[11:7];   // // Reinterpret rd field as AES register destination selector
+      end
+
+      //TODO:FINISH LATER
+      OPCODE_AES_STORE: begin
+        data_req        = 1'b1;  //issue memory read request through LSU
+        rega_used_o     = 1'b1;  //use rs1 as base address operand
+        data_type_o     = 2'b00; //load full 32-bit word (LW semantics)
+         
+        aes_mem_we_o       = 1'b1;      // enable writeback to AES register block instead of general purpose register
+        alu_operator_o     = ALU_ADD;   // compute effective address = rs1 + immediate
+        alu_op_b_mux_sel_o = OP_B_IMM;  // select immediate as ALU operand B
+
+        imm_b_mux_sel_o    = IMMB_I;    // decode I-type immediate field [31:20]
+        data_sign_extension_o = 2'b00;  // disable sign extension (word loads keep full 32 bits)
       end
 
       //////////////////////////
@@ -3032,5 +3045,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
 
   assign ctrl_transfer_insn_in_dec_o  = ctrl_transfer_insn;
   assign regfile_alu_we_dec_o         = regfile_alu_we;
+
+  assign aes_mem_we_o                = (deassert_we_i) ? 1'b0          : aes_mem_we;
 
 endmodule // cv32e40p_decoder

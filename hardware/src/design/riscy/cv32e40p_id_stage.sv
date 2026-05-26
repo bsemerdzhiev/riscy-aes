@@ -105,7 +105,10 @@ module cv32e40p_id_stage
     output logic [5:0] regfile_waddr_ex_o,
     output logic       regfile_we_ex_o,
     
-    output logic       aes_mem_we_ex_o,  ////////////////////////////////////////////////////
+    // AES
+    output logic       aes_we_ex_o, 
+    output logic       aes_ws_ex_o, 
+
                        // not using waddr as we utilize regfile_waddr_ex_o
     
 
@@ -943,6 +946,12 @@ module cv32e40p_id_stage
       .wdata_b_i(regfile_alu_wdata_fw_i),
       .we_b_i   (regfile_alu_we_fw_i)
   );
+
+  // 5 bits to choose which word to write
+  // data from LSU
+  // aes_we
+
+
 
 
   ///////////////////////////////////////////////

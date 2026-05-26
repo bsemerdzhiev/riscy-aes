@@ -235,6 +235,14 @@ module cv32e40p_core
   logic                                     regfile_alu_we_fw;
   logic        [                31:0]       regfile_alu_wdata_fw;
 
+
+  // AES Variables
+  logic                                     aes_mem_we_ex;
+  logic        [                 2:0]       aes_ws_ex;
+
+  logic                                     aes_mem_we_wb;
+  logic        [                 2:0]       aes_ws_wb;
+
   // CSR control
   logic                                     csr_access_ex;
   csr_opcode_e                              csr_op_ex;
@@ -588,9 +596,9 @@ module cv32e40p_core
 
       .regfile_waddr_ex_o(regfile_waddr_ex),
       .regfile_we_ex_o   (regfile_we_ex),
+
       ////////////////////////////////////////////
-      .aes_mem_we_ex_o   (aes_mem_we_ex),
-      ////////////////////////////////////////////
+      .aes_mem_we_ex_o   (aes_mem_we_ex), ////////////////////////////////////////////
 
       .regfile_alu_we_ex_o   (regfile_alu_we_ex),
       .regfile_alu_waddr_ex_o(regfile_alu_waddr_ex),
@@ -849,7 +857,7 @@ module cv32e40p_core
       // To ID stage: Forwarding signals
       .regfile_alu_waddr_fw_o(regfile_alu_waddr_fw),
       .regfile_alu_we_fw_o   (regfile_alu_we_fw),
-      .regfile_alu_wdata_fw_o(regfile_alu_wdata_fw),
+      .regfile_alu_wdata_fw_o(regfile_alu_wdata_fw), //also used for the aes load
 
       // stall control
       .is_decoding_i (is_decoding),
@@ -1043,6 +1051,23 @@ module cv32e40p_core
   assign csr_op       = csr_op_ex;
 
   assign csr_addr_int = csr_num_e'(csr_access_ex ? alu_operand_b_ex[11:0] : '0);
+
+
+  // Initializes the aes mem 
+  
+  cv32e40p_aes_mem aes_mem_i
+  ( 
+    /*TODO: Add parameters*/
+    .clk_i(),
+
+    .we_i(aes_mem_we_wb),
+    .waddr_i(aes_ws_ex),
+    .wdata_i(regfile_wdata),
+
+    .state_o(),
+    .key_o()
+  );
+
 
 
 
