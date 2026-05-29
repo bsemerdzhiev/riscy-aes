@@ -29,10 +29,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 module cv32e40p_aes_mem (
-  input  logic        clk,
+  input  logic        clk_i,
   input  logic        rst_n,
 
   input  logic        we_i,
+  //input  logic        key_sel_i,   // 0 = state, 1 = key
   input  logic [2:0]  waddr_i,
   input  logic [31:0] wdata_i,
 
@@ -40,9 +41,29 @@ module cv32e40p_aes_mem (
   output logic [127:0] key_o
 );
 
+  logic [127:0] state_q;
+  logic [127:0] key_q;
+  logic         key_sel;
+  
+  assign key_sel = waddr_i[2];
 
-logic          [255:0] shadow_regs;
+  always_ff @(posedge clk_i or negedge rst_n) begin
+    if (!rst_n) begin
+      state_q <= 128'b0;
+      key_q   <= 128'b0;
+    end else begin
+      if (we_i) begin
+        if (key_sel) begin
+          key_q[waddr_i[1:0]*32 +: 32] <= wdata_i;
+        end else begin
+          state_q[waddr_i[1:0]*32 +: 32] <= wdata_i;
+        end
+      end
+    end
+  end
 
-//TODO: Finish the reg file
+  assign state_o = state_q;
+  assign key_o   = key_q;
+
 
 endmodule
