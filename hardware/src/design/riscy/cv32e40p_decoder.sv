@@ -558,7 +558,9 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
         rega_used_o     = 1'b1;  //use rs1 as base address operand
         data_type_o     = 2'b00; //load full 32-bit word (LW semantics)
          
-        aes_mem_we_o       = 1'b1;      // enable writeback to AES register block instead of general purpose register
+        //aes_mem_we_o       = 1'b1;      // enable writeback to AES register block instead of general purpose register
+        regfile_mem_we        = 1'b0;
+        aes_mem_we            = 1'b1;   // enable writeback to AES register block instead of general purpose register
         alu_operator_o     = ALU_ADD;   // compute effective address = rs1 + immediate
         alu_op_b_mux_sel_o = OP_B_IMM;  // select immediate as ALU operand B
 

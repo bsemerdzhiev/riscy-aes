@@ -138,6 +138,13 @@ module cv32e40p_ex_stage
     output logic        regfile_alu_we_fw_o,
     output logic [31:0] regfile_alu_wdata_fw_o,  // forward to RF and ID/EX pipe, ALU & MUL
 
+
+    ///////////////////////////////////////////////////////////////////////////////AES pass
+    input  logic aes_mem_we_i,
+    output logic aes_mem_we_wb_o,
+    ///////////////////////////////////////////////////////////////////////////////
+    
+    
     // To IF: Jump and branch target and decision
     output logic [31:0] jump_target_o,
     output logic        branch_decision_o,
@@ -158,6 +165,8 @@ module cv32e40p_ex_stage
 
   logic        regfile_we_lsu;
   logic [ 5:0] regfile_waddr_lsu;
+  
+  logic        aes_mem_we_lsu;   //////////////////////////////////////////////AES binary key for enabling lsu
 
   logic        wb_contention;
   logic        wb_contention_lsu;
@@ -205,20 +214,41 @@ module cv32e40p_ex_stage
   always_comb begin
     regfile_we_wb_o    = 1'b0;
     regfile_waddr_wb_o = regfile_waddr_lsu;
-    regfile_wdata_wb_o = lsu_rdata_i;
+    regfile_wdata_wb_o = lsu_rdata_i;               ////////////////data is available from LSU no matter the aes_mem/ register
     wb_contention_lsu  = 1'b0;
+    
+    aes_mem_we_wb_o    = 1'b0;   //////////////////////   AES enable writeback
 
+
+    // Here we change the standard to optionality for AES
+    /*
     if (regfile_we_lsu) begin
       regfile_we_wb_o = 1'b1;
       if (apu_valid & (!apu_singlecycle & !apu_multicycle)) begin
         wb_contention_lsu = 1'b1;
       end
-      // APU two-cycle operations are written back on LSU port
-    end else if (apu_valid & (!apu_singlecycle & !apu_multicycle)) begin
-      regfile_we_wb_o    = 1'b1;
-      regfile_waddr_wb_o = apu_waddr;
-      regfile_wdata_wb_o = apu_result;
-    end
+      
+    */
+    // LSU owns writeback
+    if (regfile_we_lsu || aes_mem_we_lsu) begin
+        regfile_we_wb_o = regfile_we_lsu;   
+        // AES writeback (parallel metadata)
+        aes_mem_we_wb_o = aes_mem_we_lsu;           /////////////////////////// AES enable transfer to writeback
+    
+        if (apu_valid & (!apu_singlecycle & !apu_multicycle)) begin
+          wb_contention_lsu = 1'b1;
+        end
+    
+        // APU two-cycle operations are written back on LSU port
+    
+      end
+      // APU only if LSU unused
+      else if (apu_valid & (!apu_singlecycle & !apu_multicycle)) begin
+    
+        regfile_we_wb_o    = 1'b1;
+        regfile_waddr_wb_o = apu_waddr;
+        regfile_wdata_wb_o = apu_result;  
+      end
   end
 
   // branch handling
@@ -391,10 +421,15 @@ module cv32e40p_ex_stage
     if (~rst_n) begin
       regfile_waddr_lsu <= '0;
       regfile_we_lsu    <= 1'b0;
+      aes_mem_we_lsu    <= 1'b0;  //////// AES, set enable to 0 on reset
+
     end else begin
       if (ex_valid_o) // wb_ready_i is implied
       begin
-        regfile_we_lsu <= regfile_we_i & ~lsu_err_i;
+        regfile_we_lsu <= regfile_we_i & ~lsu_err_i;  // For standart reg file
+        
+        aes_mem_we_lsu <= aes_mem_we_i & ~lsu_err_i;  ////////////////////////////// For AES mem
+        
         if (regfile_we_i & ~lsu_err_i) begin
           regfile_waddr_lsu <= regfile_waddr_i;
         end
@@ -402,6 +437,7 @@ module cv32e40p_ex_stage
         // we are ready for a new instruction, but there is none available,
         // so we just flush the current one out of the pipe
         regfile_we_lsu <= 1'b0;
+        aes_mem_we_lsu <= 1'b0;
       end
     end
   end

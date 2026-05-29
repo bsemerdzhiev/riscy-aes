@@ -238,11 +238,21 @@ module cv32e40p_core
 
   // AES Variables
   logic                                     aes_mem_we_ex;
-  logic        [                 2:0]       aes_ws_ex;
+  //logic        [                 2:0]       aes_ws_ex;  //use the normal regfile wordselect
+ 
 
   logic                                     aes_mem_we_wb;
-  logic        [                 2:0]       aes_ws_wb;
-
+  logic                         [2:0]       aes_ws_wb;
+  logic                         [31:0]      aes_wb_data;
+  
+  
+  // AES destination comes from normal WB address path
+  assign aes_ws_wb   = regfile_waddr_fw_wb_o[2:0];
+  assign aes_wb_data = regfile_wdata;
+  
+  
+  
+  
   // CSR control
   logic                                     csr_access_ex;
   csr_opcode_e                              csr_op_ex;
@@ -844,6 +854,10 @@ module cv32e40p_core
 
       .regfile_waddr_i(regfile_waddr_ex),
       .regfile_we_i   (regfile_we_ex),
+      
+      ///////////////////////////////////////////////////////////AES 
+      .aes_mem_we_i    (aes_mem_we_ex),
+      .aes_mem_we_wb_o (aes_mem_we_wb),
 
       // Output of ex stage pipeline
       .regfile_waddr_wb_o(regfile_waddr_fw_wb_o),
@@ -1057,15 +1071,16 @@ module cv32e40p_core
   
   cv32e40p_aes_mem aes_mem_i
   ( 
-    /*TODO: Add parameters*/
-    .clk_i(),
+    .clk_i(clk),
+    .rst_n(rst_ni),
 
     .we_i(aes_mem_we_wb),
-    .waddr_i(aes_ws_ex),
-    .wdata_i(regfile_wdata),
+    //.waddr_i(aes_ws_ex),
+    .waddr_i(aes_ws_wb),
+    .wdata_i(aes_wb_data),
 
-    .state_o(),
-    .key_o()
+    .state_o(),  //128bit state output 
+    .key_o()     //128bit key output
   );
 
 
