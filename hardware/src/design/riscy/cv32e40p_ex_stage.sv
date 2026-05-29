@@ -142,6 +142,14 @@ module cv32e40p_ex_stage
     ///////////////////////////////////////////////////////////////////////////////AES pass
     input  logic aes_mem_we_i,
     output logic aes_mem_we_wb_o,
+
+    input  logic aes_enc_en_i,
+
+    input  logic [127:0] aes_state_i,
+    input  logic [127:0] aes_key_i,
+
+    output  logic [127:0] aes_state_o,
+    output  logic         aes_flush_we_o,
     ///////////////////////////////////////////////////////////////////////////////
     
     
@@ -288,6 +296,21 @@ module cv32e40p_ex_stage
 
       .ready_o   (alu_ready),
       .ex_ready_i(ex_ready_o)
+  );
+
+
+  cv32e40p_aes32_encrypt aes_encrypt_i(
+      .clk_i        (clk),
+      .rst_ni       (rst_n),
+
+      .enable_i     (aes_enc_en_i),
+      .ex_ready_i   (ex_ready_o),
+
+      .plaintext_i  (aes_state_i),
+      .round_key_i  (aes_key_i),
+
+      .ready_o      (aes_flush_we_o),
+      .ciphertext_o (aes_state_o)
   );
 
 

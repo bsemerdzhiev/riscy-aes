@@ -54,8 +54,9 @@ package cv32e40p_pkg;
   parameter OPCODE_LOAD_FP = 7'h07;
   parameter OPCODE_AMO = 7'h2F;
   
-  parameter OPCODE_AES_LOAD  = 7'h1b;  // opcode for customly introduced AES_LOAD instruction
-  parameter OPCODE_AES_STORE = 7'h3b;  // opcode for customly introduced AES_LOAD instruction
+  parameter OPCODE_AES_LOAD    = 7'h1b;  // opcode for customly introduced AES_LOAD instruction
+  parameter OPCODE_AES_STORE   = 7'h3b;  // opcode for customly introduced AES_STORE instruction
+  parameter OPCODE_AES_ENCRYPT = 7'h6b;  // opcode for customly introduced AES_ENCRYPT instruction
 
   // those opcodes are now used for PULP custom instructions
   // parameter OPCODE_CUST0     = 7'h0b

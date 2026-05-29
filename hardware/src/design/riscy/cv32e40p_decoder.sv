@@ -119,6 +119,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   
   // AES_register file signals
   output logic        aes_mem_we_o,
+  output logic        aes_enc_en_o,
 
   // CSR manipulation
   output logic        csr_access_o,            // access to CSR
@@ -159,6 +160,8 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   // write enable/request control
   logic       regfile_mem_we;
   logic       aes_mem_we;
+  logic       aes_enc_en;
+
   logic       regfile_alu_we;
   logic       data_req;
   logic [2:0] hwlp_we;
@@ -230,6 +233,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
     fp_op_group                 = ADDMUL;
 
     aes_mem_we                  = 1'b0;
+    aes_enc_en                = 1'b0;
 
     regfile_mem_we              = 1'b0;
     regfile_alu_we              = 1'b0;
@@ -581,7 +585,9 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
         imm_b_mux_sel_o    = IMMB_I;    // decode I-type immediate field [31:20]
         data_sign_extension_o = 2'b00;  // disable sign extension (word loads keep full 32 bits)
       end
-
+      OPCODE_AES_ENCRYPT: begin
+        aes_enc_en         = 1'b1;
+      end
       //////////////////////////
       //     _    _    _   _  //
       //    / \  | |  | | | | //
@@ -3049,5 +3055,6 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   assign regfile_alu_we_dec_o         = regfile_alu_we;
 
   assign aes_mem_we_o                = (deassert_we_i) ? 1'b0          : aes_mem_we;
+  assign aes_enc_en_o                = (deassert_we_i) ? 1'b0          : aes_enc_en;
 
 endmodule // cv32e40p_decoder

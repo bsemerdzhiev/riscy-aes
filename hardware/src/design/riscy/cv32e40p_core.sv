@@ -238,12 +238,19 @@ module cv32e40p_core
 
   // AES Variables
   logic                                     aes_mem_we_ex;
+  logic                                     aes_enc_en_ex;
   //logic        [                 2:0]       aes_ws_ex;  //use the normal regfile wordselect
  
 
   logic                                     aes_mem_we_wb;
   logic                         [2:0]       aes_ws_wb;
-  logic                         [31:0]      aes_wb_data;
+  logic                        [31:0]       aes_wb_data;
+
+  logic                        [127:0]      aes_state;
+  logic                        [127:0]      aes_key;
+
+  logic                                     aes_flush_we;
+  logic                        [127:0]      aes_flush_state;
   
   
   // AES destination comes from normal WB address path
@@ -608,7 +615,10 @@ module cv32e40p_core
       .regfile_we_ex_o   (regfile_we_ex),
 
       ////////////////////////////////////////////
-      .aes_mem_we_ex_o   (aes_mem_we_ex), ////////////////////////////////////////////
+      .aes_mem_we_ex_o   (aes_mem_we_ex), 
+      .aes_enc_en_o   (aes_enc_en_ex), 
+
+      ////////////////////////////////////////////
 
       .regfile_alu_we_ex_o   (regfile_alu_we_ex),
       .regfile_alu_waddr_ex_o(regfile_alu_waddr_ex),
@@ -859,6 +869,12 @@ module cv32e40p_core
       .aes_mem_we_i    (aes_mem_we_ex),
       .aes_mem_we_wb_o (aes_mem_we_wb),
 
+      .aes_state_i     (aes_state),
+      .aes_key_i       (aes_key),
+
+      .aes_state_o       (aes_flush_state),
+      .aes_flush_we_o    (aes_flush_we),
+
       // Output of ex stage pipeline
       .regfile_waddr_wb_o(regfile_waddr_fw_wb_o),
       .regfile_we_wb_o   (regfile_we_wb),
@@ -1079,8 +1095,11 @@ module cv32e40p_core
     .waddr_i(aes_ws_wb),
     .wdata_i(aes_wb_data),
 
-    .state_o(),  //128bit state output 
-    .key_o()     //128bit key output
+    .flush_we_i(aes_flush_we),
+    .flush_data_i(aes_flush_state),
+
+    .state_o(aes_state),  //128bit state output 
+    .key_o(aes_key)     //128bit key output
   );
 
 
