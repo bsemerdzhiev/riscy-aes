@@ -237,18 +237,25 @@ module cv32e40p_core
 
 
   // AES Variables
+  //                                         used for load
   logic                                     aes_mem_we_ex;
-  logic                                     aes_enc_en_ex;
-  //logic        [                 2:0]       aes_ws_ex;  //use the normal regfile wordselect
- 
-
   logic                                     aes_mem_we_wb;
   logic                         [2:0]       aes_ws_wb;
   logic                        [31:0]       aes_wb_data;
 
+  //                                         used for encrypt
+  logic                                     aes_enc_en_ex;
+
+  //                                         used for store
+  logic                         [2:0]       aes_ws_ex;
+  logic                         [2:0]       aes_ws_id; 
+  logic                        [31:0]       aes_id_data;
+
+  // used to store the aes state and key
   logic                        [127:0]      aes_state;
   logic                        [127:0]      aes_key;
 
+  // used by encryption to flush the new data back to the aes memory
   logic                                     aes_flush_we;
   logic                        [127:0]      aes_flush_state;
   
@@ -256,9 +263,9 @@ module cv32e40p_core
   // AES destination comes from normal WB address path
   assign aes_ws_wb   = regfile_waddr_fw_wb_o[2:0];
   assign aes_wb_data = regfile_wdata;
-  
-  
-  
+
+  // used for the store instruction 
+  assign aes_ws_ex   = regfile_waddr_ex[2:0];
   
   // CSR control
   logic                                     csr_access_ex;
@@ -869,6 +876,8 @@ module cv32e40p_core
       .aes_mem_we_i    (aes_mem_we_ex),
       .aes_mem_we_wb_o (aes_mem_we_wb),
 
+      .aes_enc_en_i    (aes_enc_en_ex),
+
       .aes_state_i     (aes_state),
       .aes_key_i       (aes_key),
 
@@ -1083,7 +1092,15 @@ module cv32e40p_core
   assign csr_addr_int = csr_num_e'(csr_access_ex ? alu_operand_b_ex[11:0] : '0);
 
 
-  // Initializes the aes mem 
+  //////////////////////////////////////////////////////
+  //            ______  _____   __  __ ______ __  __  //
+  //      /\   |  ____|/ ____| |  \/  |  ____|  \/  | //
+  //     /  \  | |__  | (___   | \  / | |__  | \  / | //
+  //    / /\ \ |  __|  \___ \  | |\/| |  __| | |\/| | //
+  //   / ____ \| |____ ____) | | |  | | |____| |  | | //
+  //  /_/    \_\______|_____/  |_|  |_|______|_|  |_| //
+  //                                                  //
+  //////////////////////////////////////////////////////
   
   cv32e40p_aes_mem aes_mem_i
   ( 
@@ -1091,18 +1108,20 @@ module cv32e40p_core
     .rst_n(rst_ni),
 
     .we_i(aes_mem_we_wb),
-    //.waddr_i(aes_ws_ex),
+
     .waddr_i(aes_ws_wb),
     .wdata_i(aes_wb_data),
 
-    .flush_we_i(aes_flush_we),
-    .flush_data_i(aes_flush_state),
+    // used to read the the word to write to memory
+    .raddr_i(aes_ws_id),
+    .rdata_o(aes_id_data),
+
+    .aes_flush_we_i(aes_flush_we),
+    .aes_flush_state_i(aes_flush_state),
 
     .state_o(aes_state),  //128bit state output 
     .key_o(aes_key)     //128bit key output
   );
-
-
 
 
   ///////////////////////////

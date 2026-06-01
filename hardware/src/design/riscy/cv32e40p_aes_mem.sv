@@ -37,8 +37,12 @@ module cv32e40p_aes_mem (
   input  logic [2:0]  waddr_i,
   input  logic [31:0] wdata_i,
 
-  input logic  [127:0] aes_flush_state_i,
-  input logic          aes_flush_we_i,
+  input  logic  [127:0] aes_flush_state_i,
+  input  logic          aes_flush_we_i,
+
+  input  logic  [2:0]   raddr_i,
+  output logic  [31:0]  rdata_o,
+
 
   output logic [127:0] state_o,
   output logic [127:0] key_o
@@ -68,6 +72,9 @@ module cv32e40p_aes_mem (
       end
     end
   end
+
+  // outputs the word selected by raddr_i
+  assign rdata_o = key_q[raddr_i[1:0]*32 +: 32];
 
   assign state_o = state_q;
   assign key_o   = key_q;

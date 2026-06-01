@@ -107,10 +107,11 @@ module cv32e40p_id_stage
     
     // AES
     output logic       aes_we_ex_o, 
-    output logic       aes_ws_ex_o, 
+    output logic       aes_mem_we_ex_o,
+    output logic       aes_enc_en_o,
 
-                       // not using waddr as we utilize regfile_waddr_ex_o
-    
+    output logic  [2:0]    aes_ws_id_o,
+    input logic   [31:0]     aes_id_data_i,    
 
     output logic [5:0] regfile_alu_waddr_ex_o,
     output logic       regfile_alu_we_ex_o,
@@ -404,6 +405,7 @@ module cv32e40p_id_stage
   
   // AES reg file
   logic aes_mem_we_id; /////////////////////////////////////////////////////////////////////////////
+  logic aes_enc_en;
 
   // Data Memory Control
   logic data_we_id;
@@ -1051,6 +1053,7 @@ module cv32e40p_id_stage
       .regfile_alu_waddr_sel_o(regfile_alu_waddr_mux_sel),
       
       .aes_mem_we_o           (aes_mem_we_id),
+      .aes_enc_en_o           (aes_enc_en),
 
 
       // CSR control signals
@@ -1564,6 +1567,7 @@ module cv32e40p_id_stage
         
         ///////////////////////////////////////////////////////////////
         aes_mem_we_ex_o <= aes_mem_we_id;
+        aes_enc_en_o    <= aes_enc_en;
         ///////////////////////////////////////////////////////////////
 
         regfile_alu_we_ex_o <= regfile_alu_we_id;

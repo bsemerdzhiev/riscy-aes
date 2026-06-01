@@ -30,4 +30,4 @@ report_timing_summary -delay_type min_max -report_unconstrained -check_timing_ve
 
 # Report Utilization
 report_utilization -name utilization_1 
-report_utilization -cell [get_cells RISCV_CORE] -file ./vivado/ooc_riscy/ooc_riscy.runs/ooc_synth/ooc_utilization_summary.txt
+report_utilization -cell [get_cells riscv_core] -file ./vivado/ooc_riscy/ooc_riscy.runs/ooc_synth/ooc_utilization_summary.txt

@@ -181,6 +181,7 @@ module cv32e40p_ex_stage
 
   logic        alu_ready;
   logic        mult_ready;
+  logic        aes_ready;
 
   // APU signals
   logic        apu_valid;
@@ -212,8 +213,10 @@ module cv32e40p_ex_stage
     end else begin
       regfile_alu_we_fw_o    = regfile_alu_we_i & ~apu_en_i;  // private fpu incomplete?
       regfile_alu_waddr_fw_o = regfile_alu_waddr_i;
+
       if (alu_en_i) regfile_alu_wdata_fw_o = alu_result;
       if (mult_en_i) regfile_alu_wdata_fw_o = mult_result;
+
       if (csr_access_i) regfile_alu_wdata_fw_o = csr_rdata_i;
     end
   end
@@ -309,7 +312,7 @@ module cv32e40p_ex_stage
       .plaintext_i  (aes_state_i),
       .round_key_i  (aes_key_i),
 
-      .ready_o      (aes_flush_we_o),
+      .ready_o      (aes_ready),
       .ciphertext_o (aes_state_o)
   );
 
@@ -468,7 +471,7 @@ module cv32e40p_ex_stage
   // As valid always goes to the right and ready to the left, and we are able
   // to finish branches without going to the WB stage, ex_valid does not
   // depend on ex_ready.
-  assign ex_ready_o = (~apu_stall & alu_ready & mult_ready & lsu_ready_ex_i
+  assign ex_ready_o = (~apu_stall & alu_ready & aes_ready & mult_ready & lsu_ready_ex_i
                        & wb_ready_i & ~wb_contention) | (branch_in_ex_i);
   assign ex_valid_o = (apu_valid | alu_en_i | mult_en_i | csr_access_i | lsu_en_i)
                        & (alu_ready & mult_ready & lsu_ready_ex_i & wb_ready_i);

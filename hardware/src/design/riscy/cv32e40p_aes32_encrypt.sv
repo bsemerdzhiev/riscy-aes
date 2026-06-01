@@ -1,12 +1,14 @@
-module aes32_encrypt
+module cv32e40p_aes32_encrypt
   import cv32e40p_pkg::*;
-  import aes_pkg::*;
+  import cv32e40p_aes_pkg::*;
 #()
 (
   input logic clk_i,
   input logic rst_ni,
   input logic enable_i,                // high when we can start encrypting
+
   input logic ex_ready_i,              // transition back to IDLE when high (when the result can be latched)
+
   input logic [127:0] plaintext_i,
   input logic [127:0] round_key_i,     // initial round key loaded by aes32_load
 
@@ -15,13 +17,11 @@ module aes32_encrypt
 );
 
 // fsm states
-typedef enum logic [2:0] {
+typedef enum logic [1:0] {
   IDLE = 3'd0,
-  INIT = 3'd1,
-  SUBBYTES = 3'd2,
-  MIXCOLUMNS = 3'd3,
-  FINALROUND = 3'd4,
-  DONE = 3'd5
+  STAGE_ONE = 3'd1,
+  STAGE_TWO = 3'd2,
+  DONE = 3'd3
 } aes_state_e;
 
 aes_state_e state_q, state_d;
@@ -130,44 +130,42 @@ always_comb begin
   round_d = round_q;
   ready_o = 1'b0;
 
-  case (state_q)
+  case (state_d)
     IDLE: begin
       ready_o = 1'b1; // just idle, so the pipeline can work on smth else
 
-      if (enable_i ) begin
+      if (enable_i) begin
         aes_block_d = plaintext_i;
         round_key_d =  round_key_i;
-        round_d = 4'd0;
-        state_d = INIT;
+        round_d = 4'd1;
+        state_d = STAGE_ONE;
+
+        aes_block_d = aes_block_d ^ round_key_q;
+        round_key_d = key_expand(round_key_d, 4'd1); 
       end
     end
 
-    INIT: begin
-      aes_block_d = aes_block_q ^ round_key_q;
-      round_key_d = key_expand(round_key_q, 4'd1); 
-      round_d = 4'd1;
-      state_d = SUBBYTES;
+    STAGE_ONE: begin
+      // sub bytes and shift rows
+      aes_block_d = aes_sub_bytes(aes_block_d);
+      aes_block_d = aes_shift_rows(aes_block_d);
+
+      state_d = STAGE_TWO;
     end
 
-    SUBBYTES: begin
-      aes_block_d = aes_shift_rows(aes_sub_bytes(aes_block_q));
-      if (round_q == 4'd10) begin
-        state_d = FINALROUND;
+    STAGE_TWO: begin
+      // mix columns and add round key
+      if (round_d < 4'd10) begin
+        aes_block_d = aes_mix_columns(aes_block_d);
+        state_d = STAGE_ONE;
       end else begin
-        state_d = MIXCOLUMNS;
+        state_d = DONE;
       end
-    end
 
-    MIXCOLUMNS: begin
-      aes_block_d = aes_mix_columns(aes_block_q) ^ round_key_q;
-      round_key_d = key_expand(round_key_q, round_q + 4'd1);
-      round_d = round_q + 4'd1;
-      state_d = SUBBYTES;
-    end
+      round_key_d = key_expand(round_key_d, round_d);
+      aes_block_d = aes_block_d ^ round_key_d;
 
-    FINALROUND: begin
-      aes_block_d = aes_block_q ^ round_key_q; 
-      state_d = DONE;
+      round_d = round_d + 4'd1;
     end
 
     DONE: begin

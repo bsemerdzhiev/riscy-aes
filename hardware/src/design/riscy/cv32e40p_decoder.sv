@@ -120,6 +120,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   // AES_register file signals
   output logic        aes_mem_we_o,
   output logic        aes_enc_en_o,
+  output logic        aes_store_en_o,
 
   // CSR manipulation
   output logic        csr_access_o,            // access to CSR
@@ -161,6 +162,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   logic       regfile_mem_we;
   logic       aes_mem_we;
   logic       aes_enc_en;
+  logic       aes_store_en;
 
   logic       regfile_alu_we;
   logic       data_req;
@@ -233,7 +235,8 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
     fp_op_group                 = ADDMUL;
 
     aes_mem_we                  = 1'b0;
-    aes_enc_en                = 1'b0;
+    aes_enc_en                  = 1'b0;
+    aes_store_en                  = 1'b0;
 
     regfile_mem_we              = 1'b0;
     regfile_alu_we              = 1'b0;
@@ -560,31 +563,41 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
       OPCODE_AES_LOAD: begin
         data_req        = 1'b1;  //issue memory read request through LSU
         rega_used_o     = 1'b1;  //use rs1 as base address operand
+        // regb_used_o     = 1'b1;  //use rs1 as base address operand
+        // regc_used_o     = 1'b1;
+
         data_type_o     = 2'b00; //load full 32-bit word (LW semantics)
          
         //aes_mem_we_o       = 1'b1;      // enable writeback to AES register block instead of general purpose register
         regfile_mem_we        = 1'b0;
         aes_mem_we            = 1'b1;   // enable writeback to AES register block instead of general purpose register
+
         alu_operator_o     = ALU_ADD;   // compute effective address = rs1 + immediate
         alu_op_b_mux_sel_o = OP_B_IMM;  // select immediate as ALU operand B
 
         imm_b_mux_sel_o    = IMMB_I;    // decode I-type immediate field [31:20]
         data_sign_extension_o = 2'b00;  // disable sign extension (word loads keep full 32 bits)
+
+        // regc_mux_o            = REGC_RD;
       end
 
-      //TODO:FINISH LATER
       OPCODE_AES_STORE: begin
         data_req        = 1'b1;  //issue memory read request through LSU
         rega_used_o     = 1'b1;  //use rs1 as base address operand
         data_type_o     = 2'b00; //load full 32-bit word (LW semantics)
+
+        aes_store_en    = 1'b1;
+        data_we_o       = 1'b1;
+
+        aes_store_en    = 1'b1;
          
-        aes_mem_we_o       = 1'b1;      // enable writeback to AES register block instead of general purpose register
         alu_operator_o     = ALU_ADD;   // compute effective address = rs1 + immediate
         alu_op_b_mux_sel_o = OP_B_IMM;  // select immediate as ALU operand B
 
         imm_b_mux_sel_o    = IMMB_I;    // decode I-type immediate field [31:20]
         data_sign_extension_o = 2'b00;  // disable sign extension (word loads keep full 32 bits)
       end
+
       OPCODE_AES_ENCRYPT: begin
         aes_enc_en         = 1'b1;
       end
@@ -3056,5 +3069,6 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
 
   assign aes_mem_we_o                = (deassert_we_i) ? 1'b0          : aes_mem_we;
   assign aes_enc_en_o                = (deassert_we_i) ? 1'b0          : aes_enc_en;
+  assign aes_store_en_o              = (deassert_we_i) ? 1'b0          : aes_store_en;
 
 endmodule // cv32e40p_decoder
