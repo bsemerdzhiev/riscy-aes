@@ -3,3 +3,5 @@ vivado
 *.log
 .Xil
 NA
+
+hardware/*.str

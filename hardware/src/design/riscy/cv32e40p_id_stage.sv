@@ -110,7 +110,7 @@ module cv32e40p_id_stage
     output logic       aes_mem_we_ex_o,
     output logic       aes_enc_en_o,
 
-    output logic  [2:0]    aes_ws_id_o,
+    output logic  [2:0]      aes_ws_id_o,
     input logic   [31:0]     aes_id_data_i,    
 
     output logic [5:0] regfile_alu_waddr_ex_o,
@@ -405,7 +405,9 @@ module cv32e40p_id_stage
   
   // AES reg file
   logic aes_mem_we_id; /////////////////////////////////////////////////////////////////////////////
+
   logic aes_enc_en;
+  logic aes_store_en;
 
   // Data Memory Control
   logic data_we_id;
@@ -1054,6 +1056,7 @@ module cv32e40p_id_stage
       
       .aes_mem_we_o           (aes_mem_we_id),
       .aes_enc_en_o           (aes_enc_en),
+      .aes_store_en_o         (aes_store_en),
 
 
       // CSR control signals
@@ -1519,7 +1522,13 @@ module cv32e40p_id_stage
           alu_operator_ex_o   <= alu_operator;
           alu_operand_a_ex_o  <= alu_operand_a;
           alu_operand_b_ex_o  <= alu_operand_b;
-          alu_operand_c_ex_o  <= alu_operand_c;
+
+          if (aes_store_en) begin
+            alu_operand_c_ex_o  <= aes_id_data_i;
+          end else begin
+            alu_operand_c_ex_o  <= alu_operand_c;
+          end
+
           bmask_a_ex_o        <= bmask_a_id;
           bmask_b_ex_o        <= bmask_b_id;
           imm_vec_ext_ex_o    <= imm_vec_ext_id;
