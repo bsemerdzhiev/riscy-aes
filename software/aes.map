@@ -168,26 +168,26 @@ Linker script and memory map
                 0x000082d2                sleep_busy
 
 .text.aes128_ecb_encrypt
-                0x000082ec       0x3c
+                0x000082ec       0x28
  .text.aes128_ecb_encrypt
-                0x000082ec       0x3c main.o
+                0x000082ec       0x28 main.o
                 0x000082ec                aes128_ecb_encrypt
 
 .text.write_to_address
-                0x00008328        0x4
+                0x00008314        0x4
  .text.write_to_address
-                0x00008328        0x4 main.o
-                0x00008328                write_to_address
+                0x00008314        0x4 main.o
+                0x00008314                write_to_address
 
 .text.write_v_to_address
-                0x0000832c       0x12
+                0x00008318       0x12
  .text.write_v_to_address
-                0x0000832c       0x12 main.o
-                0x0000832c                write_v_to_address
+                0x00008318       0x12 main.o
+                0x00008318                write_v_to_address
 
-.text.main      0x0000833e      0x102
- .text.main     0x0000833e      0x102 main.o
-                0x0000833e                main
+.text.main      0x0000832a       0xe2
+ .text.main     0x0000832a       0xe2 main.o
+                0x0000832a                main
 
 .preinit_array  0x00100000        0x0
                 [!provide]                        PROVIDE (__preinit_array_start = .)
@@ -206,37 +206,37 @@ Linker script and memory map
  *(.fini_array)
                 [!provide]                        PROVIDE (__fini_array_end = .)
 
-.rodata         0x00100000       0x30
+.rodata         0x00100000       0x20
                 0x00100000                        . = ALIGN (0x4)
  *(.rodata)
  *(.rodata.*)
- .rodata.cst16  0x00100000       0x30 main.o
+ .rodata.cst16  0x00100000       0x20 main.o
 
-.rela.dyn       0x00100030        0x0
- .rela.text     0x00100030        0x0 include/tcutils.o
+.rela.dyn       0x00100020        0x0
+ .rela.text     0x00100020        0x0 include/tcutils.o
 
-.shbss          0x00100030        0x0
-                0x00100030                        . = ALIGN (0x4)
+.shbss          0x00100020        0x0
+                0x00100020                        . = ALIGN (0x4)
  *(.shbss)
 
-.data           0x00100030        0x0
-                0x00100030                        . = ALIGN (0x4)
-                0x00100030                        sdata = .
-                0x00100030                        _sdata = .
+.data           0x00100020        0x0
+                0x00100020                        . = ALIGN (0x4)
+                0x00100020                        sdata = .
+                0x00100020                        _sdata = .
  *(.data)
  *(.data.*)
-                0x00100030                        edata = .
-                0x00100030                        _edata = .
+                0x00100020                        edata = .
+                0x00100020                        _edata = .
 
-.bss            0x00100030        0x0
-                0x00100030                        . = ALIGN (0x4)
-                0x00100030                        _bss_start = .
+.bss            0x00100020        0x0
+                0x00100020                        . = ALIGN (0x4)
+                0x00100020                        _bss_start = .
  *(.bss)
  *(.bss.*)
  *(.sbss)
  *(.sbss.*)
  *(COMMON)
-                0x00100030                        _bss_end = .
+                0x00100020                        _bss_end = .
 
 .stack          0x00104000     0x4000
                 0x00104000                        . = ALIGN (0x4)
@@ -252,9 +252,9 @@ Linker script and memory map
 .stabstr
  *(.stabstr)
 
-.bss            0x00100030        0x0
-                0x00100030                        . = ALIGN (0x4)
-                0x00100030                        _end = .
+.bss            0x00100020        0x0
+                0x00100020                        . = ALIGN (0x4)
+                0x00100020                        _end = .
 LOAD /opt/riscv/riscv32-unknown-elf/lib/libc.a
 LOAD include/exceptions.o
 LOAD include/int.o
@@ -264,24 +264,24 @@ LOAD main.o
 LOAD crt0.riscv.o
 OUTPUT(output/soft.elf elf32-littleriscv)
 
-.debug_abbrev   0x00000000      0x384
+.debug_abbrev   0x00000000      0x346
  .debug_abbrev  0x00000000       0x31 include/exceptions.o
  .debug_abbrev  0x00000031       0x31 include/int.o
  .debug_abbrev  0x00000062       0xc2 include/tcutils.o
  .debug_abbrev  0x00000124       0xcf include/utils.o
- .debug_abbrev  0x000001f3      0x172 main.o
- .debug_abbrev  0x00000365       0x1f crt0.riscv.o
+ .debug_abbrev  0x000001f3      0x134 main.o
+ .debug_abbrev  0x00000327       0x1f crt0.riscv.o
 
-.debug_info     0x00000000      0x88f
+.debug_info     0x00000000      0x89b
  .debug_info    0x00000000       0x49 include/exceptions.o
  .debug_info    0x00000049       0x8b include/int.o
  .debug_info    0x000000d4      0x1c8 include/tcutils.o
  .debug_info    0x0000029c       0xa8 include/utils.o
- .debug_info    0x00000344      0x2a0 main.o
- .debug_info    0x000005e4      0x2ab crt0.riscv.o
+ .debug_info    0x00000344      0x2ac main.o
+ .debug_info    0x000005f0      0x2ab crt0.riscv.o
 
 .debug_rnglists
-                0x00000000       0xd7
+                0x00000000       0xf8
  .debug_rnglists
                 0x00000000       0x1a include/exceptions.o
  .debug_rnglists
@@ -291,9 +291,9 @@ OUTPUT(output/soft.elf elf32-littleriscv)
  .debug_rnglists
                 0x00000069       0x1a include/utils.o
  .debug_rnglists
-                0x00000083       0x39 main.o
+                0x00000083       0x5a main.o
  .debug_rnglists
-                0x000000bc       0x1b crt0.riscv.o
+                0x000000dd       0x1b crt0.riscv.o
 
 .debug_str_offsets
                 0x00000000      0x194
@@ -320,12 +320,12 @@ OUTPUT(output/soft.elf elf32-littleriscv)
  .debug_str     0x000002f2        0x0 main.o
                                 0x1ac (size before relaxing)
 
-.debug_addr     0x00000000       0xa8
+.debug_addr     0x00000000       0xa4
  .debug_addr    0x00000000       0x14 include/exceptions.o
  .debug_addr    0x00000014       0x2c include/int.o
  .debug_addr    0x00000040       0x20 include/tcutils.o
  .debug_addr    0x00000060       0x18 include/utils.o
- .debug_addr    0x00000078       0x30 main.o
+ .debug_addr    0x00000078       0x2c main.o
 
 .comment        0x00000000       0x6c
  .comment       0x00000000       0x6c include/exceptions.o
@@ -367,20 +367,20 @@ OUTPUT(output/soft.elf elf32-littleriscv)
  .riscv.attributes
                 0x000001db       0x5d crt0.riscv.o
 
-.debug_frame    0x00000000      0x224
+.debug_frame    0x00000000      0x214
  .debug_frame   0x00000000       0x44 include/exceptions.o
  .debug_frame   0x00000044       0xa4 include/int.o
  .debug_frame   0x000000e8       0x84 include/tcutils.o
  .debug_frame   0x0000016c       0x4c include/utils.o
- .debug_frame   0x000001b8       0x6c main.o
+ .debug_frame   0x000001b8       0x5c main.o
 
-.debug_line     0x00000000      0x7a8
+.debug_line     0x00000000      0x7bf
  .debug_line    0x00000000       0x82 include/exceptions.o
  .debug_line    0x00000082      0x100 include/int.o
  .debug_line    0x00000182      0x1c6 include/tcutils.o
  .debug_line    0x00000348       0xa6 include/utils.o
- .debug_line    0x000003ee      0x1af main.o
- .debug_line    0x0000059d      0x20b crt0.riscv.o
+ .debug_line    0x000003ee      0x1c6 main.o
+ .debug_line    0x000005b4      0x20b crt0.riscv.o
 
 .debug_line_str
                 0x00000000      0x130
@@ -404,13 +404,13 @@ OUTPUT(output/soft.elf elf32-littleriscv)
                                  0x3e (size before relaxing)
 
 .debug_loclists
-                0x00000000      0x3bb
+                0x00000000      0x3a4
  .debug_loclists
                 0x00000000      0x15d include/tcutils.o
  .debug_loclists
                 0x0000015d       0x1f include/utils.o
  .debug_loclists
-                0x0000017c      0x23f main.o
+                0x0000017c      0x228 main.o
 
 .debug_aranges  0x00000000       0x28
  .debug_aranges

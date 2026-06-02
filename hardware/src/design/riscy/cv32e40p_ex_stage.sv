@@ -183,6 +183,8 @@ module cv32e40p_ex_stage
   logic        mult_ready;
   logic        aes_ready;
 
+  logic        aes_flush;
+
   // APU signals
   logic        apu_valid;
   logic [ 5:0] apu_waddr;
@@ -313,9 +315,10 @@ module cv32e40p_ex_stage
       .round_key_i  (aes_key_i),
 
       .ready_o      (aes_ready),
-      .ciphertext_o (aes_state_o)
-  );
+      .ciphertext_o (aes_state_o),
 
+      .aes_flush_en_o (aes_flush)
+  );
 
   ////////////////////////////////////////////////////////////////
   //  __  __ _   _ _   _____ ___ ____  _     ___ _____ ____     //
@@ -448,6 +451,7 @@ module cv32e40p_ex_stage
       regfile_waddr_lsu <= '0;
       regfile_we_lsu    <= 1'b0;
       aes_mem_we_lsu    <= 1'b0;  //////// AES, set enable to 0 on reset
+      aes_flush_we_o    <= 1'b0;
 
     end else begin
       if (ex_valid_o) // wb_ready_i is implied
@@ -455,6 +459,8 @@ module cv32e40p_ex_stage
         regfile_we_lsu <= regfile_we_i & ~lsu_err_i;  // For standart reg file
         
         aes_mem_we_lsu <= aes_mem_we_i & ~lsu_err_i;  ////////////////////////////// For AES mem
+
+        aes_flush_we_o <= aes_flush    & ~lsu_err_i;
         
         if (regfile_we_i & ~lsu_err_i) begin
           regfile_waddr_lsu <= regfile_waddr_i;
@@ -464,6 +470,7 @@ module cv32e40p_ex_stage
         // so we just flush the current one out of the pipe
         regfile_we_lsu <= 1'b0;
         aes_mem_we_lsu <= 1'b0;
+        aes_flush_we_o <= 1'b0;
       end
     end
   end

@@ -13,7 +13,9 @@ module cv32e40p_aes32_encrypt
   input logic [127:0] round_key_i,     // initial round key loaded by aes32_load
 
   output logic ready_o,                // high when we're done with encryption
-  output logic [127:0] ciphertext_o
+  output logic [127:0] ciphertext_o,
+
+  output logic aes_flush_en_o
 );
 
 // fsm states
@@ -130,6 +132,8 @@ always_comb begin
   round_d = round_q;
   ready_o = 1'b0;
 
+  aes_flush_en_o = 1'b0;
+
   case (state_d)
     IDLE: begin
       ready_o = 1'b1; // just idle, so the pipeline can work on smth else
@@ -170,6 +174,7 @@ always_comb begin
 
     DONE: begin
       ready_o = 1'b1;
+      aes_flush_en_o = 1'b1;
 
       // if the result is ready to be latched then go back to idle
       if (ex_ready_i) begin

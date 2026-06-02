@@ -74,7 +74,7 @@ module cv32e40p_aes_mem (
   end
 
   // outputs the word selected by raddr_i
-  assign rdata_o = key_q[raddr_i[1:0]*32 +: 32];
+  assign rdata_o = state_q[raddr_i[1:0]*32 +: 32];
 
   assign state_o = state_q;
   assign key_o   = key_q;

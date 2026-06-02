@@ -18,13 +18,13 @@ void aes128_ecb_encrypt(uint8_t *plaintext, size_t len, uint8_t *key,
   __asm__ volatile("aes.load x3, 12(%0)" : : "r"(plaintext));
 
   // load the key col
-  __asm__ volatile("aes.load x4, 0(%0)" : : "r"(key));
-  __asm__ volatile("aes.load x5, 4(%0)" : : "r"(key));
-  __asm__ volatile("aes.load x6, 8(%0)" : : "r"(key));
-  __asm__ volatile("aes.load x7, 12(%0)" : : "r"(key));
+  // __asm__ volatile("aes.load x4, 0(%0)" : : "r"(key));
+  // __asm__ volatile("aes.load x5, 4(%0)" : : "r"(key));
+  // __asm__ volatile("aes.load x6, 8(%0)" : : "r"(key));
+  // __asm__ volatile("aes.load x7, 12(%0)" : : "r"(key));
 
   // perform the encryption
-  __asm__ volatile("aes.encrypt");
+  // __asm__ volatile("aes.encrypt");
 
   // store the state col
   __asm__ volatile("aes.store x0, 0(%0)" : : "r"(ciphertext));

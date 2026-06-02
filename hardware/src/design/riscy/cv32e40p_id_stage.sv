@@ -1577,6 +1577,10 @@ module cv32e40p_id_stage
         ///////////////////////////////////////////////////////////////
         aes_mem_we_ex_o <= aes_mem_we_id;
         aes_enc_en_o    <= aes_enc_en;
+
+        if (aes_mem_we_id) begin
+          regfile_waddr_ex_o <= regfile_waddr_id;
+        end
         ///////////////////////////////////////////////////////////////
 
         regfile_alu_we_ex_o <= regfile_alu_we_id;
