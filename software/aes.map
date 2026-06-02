@@ -168,26 +168,26 @@ Linker script and memory map
                 0x000082d2                sleep_busy
 
 .text.aes128_ecb_encrypt
-                0x000082ec       0x4a
+                0x000082ec       0x48
  .text.aes128_ecb_encrypt
-                0x000082ec       0x4a main.o
+                0x000082ec       0x48 main.o
                 0x000082ec                aes128_ecb_encrypt
 
 .text.write_to_address
-                0x00008336        0x4
+                0x00008334        0x4
  .text.write_to_address
-                0x00008336        0x4 main.o
-                0x00008336                write_to_address
+                0x00008334        0x4 main.o
+                0x00008334                write_to_address
 
 .text.write_v_to_address
-                0x0000833a       0x12
+                0x00008338       0x12
  .text.write_v_to_address
-                0x0000833a       0x12 main.o
-                0x0000833a                write_v_to_address
+                0x00008338       0x12 main.o
+                0x00008338                write_v_to_address
 
-.text.main      0x0000834c      0x102
- .text.main     0x0000834c      0x102 main.o
-                0x0000834c                main
+.text.main      0x0000834a      0x102
+ .text.main     0x0000834a      0x102 main.o
+                0x0000834a                main
 
 .preinit_array  0x00100000        0x0
                 [!provide]                        PROVIDE (__preinit_array_start = .)
@@ -374,13 +374,13 @@ OUTPUT(output/soft.elf elf32-littleriscv)
  .debug_frame   0x0000016c       0x4c include/utils.o
  .debug_frame   0x000001b8       0x6c main.o
 
-.debug_line     0x00000000      0x7af
+.debug_line     0x00000000      0x7ae
  .debug_line    0x00000000       0x82 include/exceptions.o
  .debug_line    0x00000082      0x100 include/int.o
  .debug_line    0x00000182      0x1c6 include/tcutils.o
  .debug_line    0x00000348       0xa6 include/utils.o
- .debug_line    0x000003ee      0x1b6 main.o
- .debug_line    0x000005a4      0x20b crt0.riscv.o
+ .debug_line    0x000003ee      0x1b5 main.o
+ .debug_line    0x000005a3      0x20b crt0.riscv.o
 
 .debug_line_str
                 0x00000000      0x130

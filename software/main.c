@@ -33,7 +33,6 @@ void aes128_ecb_encrypt(uint8_t *plaintext, size_t len, uint8_t *key,
   __asm__ volatile("nop");
   __asm__ volatile("nop");
   __asm__ volatile("nop");
-  __asm__ volatile("nop");
 
   // store the state col
   __asm__ volatile("aes.store x0, 0(%0)" : : "r"(ciphertext));
