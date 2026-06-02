@@ -480,7 +480,7 @@ module cv32e40p_ex_stage
   // depend on ex_ready.
   assign ex_ready_o = (~apu_stall & alu_ready & aes_ready & mult_ready & lsu_ready_ex_i
                        & wb_ready_i & ~wb_contention) | (branch_in_ex_i);
-  assign ex_valid_o = (apu_valid | alu_en_i | mult_en_i | csr_access_i | lsu_en_i)
+  assign ex_valid_o = (apu_valid | alu_en_i | aes_enc_en_i | aes_mem_we_i | mult_en_i | csr_access_i | lsu_en_i)
                        & (alu_ready & mult_ready & lsu_ready_ex_i & wb_ready_i);
 
 endmodule

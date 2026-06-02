@@ -236,7 +236,7 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
 
     aes_mem_we                  = 1'b0;
     aes_enc_en                  = 1'b0;
-    aes_store_en                  = 1'b0;
+    aes_store_en                = 1'b0;
 
     regfile_mem_we              = 1'b0;
     regfile_alu_we              = 1'b0;
@@ -589,10 +589,10 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
         aes_store_en    = 1'b1;
         data_we_o       = 1'b1;
 
-        aes_store_en    = 1'b1;
-         
         alu_operator_o     = ALU_ADD;   // compute effective address = rs1 + immediate
         alu_op_b_mux_sel_o = OP_B_IMM;  // select immediate as ALU operand B
+
+        alu_op_c_mux_sel_o = OP_C_REGC_OR_FWD;  
 
         imm_b_mux_sel_o    = IMMB_I;    // decode I-type immediate field [31:20]
         data_sign_extension_o = 2'b00;  // disable sign extension (word loads keep full 32 bits)

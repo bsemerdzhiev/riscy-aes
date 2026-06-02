@@ -955,8 +955,7 @@ module cv32e40p_id_stage
   // data from LSU
   // aes_we
 
-
-
+  assign aes_ws_id_o = instr[REG_D_MSB:REG_D_LSB];
 
   ///////////////////////////////////////////////
   //  ____  _____ ____ ___  ____  _____ ____   //

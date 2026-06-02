@@ -20,10 +20,10 @@ module cv32e40p_aes32_encrypt
 
 // fsm states
 typedef enum logic [1:0] {
-  IDLE = 3'd0,
-  STAGE_ONE = 3'd1,
-  STAGE_TWO = 3'd2,
-  DONE = 3'd3
+  IDLE = 2'd0,
+  STAGE_ONE = 2'd1,
+  STAGE_TWO = 2'd2,
+  DONE = 2'd3
 } aes_state_e;
 
 aes_state_e state_q, state_d;
@@ -139,17 +139,31 @@ always_comb begin
       ready_o = 1'b1; // just idle, so the pipeline can work on smth else
 
       if (enable_i) begin
-        aes_block_d = plaintext_i;
-        round_key_d =  round_key_i;
+        aes_block_d = {plaintext_i[7:0],   plaintext_i[15:8],  plaintext_i[23:16], plaintext_i[31:24],
+               plaintext_i[39:32],  plaintext_i[47:40], plaintext_i[55:48], plaintext_i[63:56],
+               plaintext_i[71:64],  plaintext_i[79:72], plaintext_i[87:80], plaintext_i[95:88],
+               plaintext_i[103:96], plaintext_i[111:104], plaintext_i[119:112], plaintext_i[127:120]};
+        // aes_block_d = plaintext_i;
+
+        round_key_d = {round_key_i[7:0],   round_key_i[15:8],  round_key_i[23:16], round_key_i[31:24],
+               round_key_i[39:32], round_key_i[47:40], round_key_i[55:48], round_key_i[63:56],
+               round_key_i[71:64], round_key_i[79:72], round_key_i[87:80], round_key_i[95:88],
+               round_key_i[103:96], round_key_i[111:104], round_key_i[119:112], round_key_i[127:120]};
+        // round_key_d = round_key_i;
+
+
         round_d = 4'd1;
         state_d = STAGE_ONE;
 
-        aes_block_d = aes_block_d ^ round_key_q;
+        aes_block_d = aes_block_d ^ round_key_d;
+
         round_key_d = key_expand(round_key_d, 4'd1); 
       end
     end
 
     STAGE_ONE: begin
+      // ready_o = 1'b0; // just idle, so the pipeline can work on smth else
+
       // sub bytes and shift rows
       aes_block_d = aes_sub_bytes(aes_block_d);
       aes_block_d = aes_shift_rows(aes_block_d);
@@ -158,6 +172,8 @@ always_comb begin
     end
 
     STAGE_TWO: begin
+      // ready_o = 1'b0; // just idle, so the pipeline can work on smth else
+
       // mix columns and add round key
       if (round_d < 4'd10) begin
         aes_block_d = aes_mix_columns(aes_block_d);
@@ -166,15 +182,15 @@ always_comb begin
         state_d = DONE;
       end
 
-      round_key_d = key_expand(round_key_d, round_d);
+      round_d = round_d + 4'd1;
       aes_block_d = aes_block_d ^ round_key_d;
 
-      round_d = round_d + 4'd1;
+      round_key_d = key_expand(round_key_d, round_d);
     end
 
     DONE: begin
-      ready_o = 1'b1;
       aes_flush_en_o = 1'b1;
+      ready_o = 1'b1; // just idle, so the pipeline can work on smth else
 
       // if the result is ready to be latched then go back to idle
       if (ex_ready_i) begin
@@ -184,6 +200,9 @@ always_comb begin
   endcase
 end
 
-assign ciphertext_o = aes_block_q;
+assign ciphertext_o = {aes_block_q[7:0],   aes_block_q[15:8],  aes_block_q[23:16], aes_block_q[31:24],
+                       aes_block_q[39:32],  aes_block_q[47:40], aes_block_q[55:48], aes_block_q[63:56],
+                       aes_block_q[71:64],  aes_block_q[79:72], aes_block_q[87:80], aes_block_q[95:88],
+                       aes_block_q[103:96], aes_block_q[111:104], aes_block_q[119:112], aes_block_q[127:120]};
 
 endmodule
