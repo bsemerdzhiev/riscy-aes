@@ -462,7 +462,7 @@ module cv32e40p_ex_stage
 
         aes_flush_we_o <= aes_flush    & ~lsu_err_i;
         
-        if (regfile_we_i & ~lsu_err_i) begin
+        if ((regfile_we_i | aes_mem_we_i) & ~lsu_err_i) begin
           regfile_waddr_lsu <= regfile_waddr_i;
         end
       end else if (wb_ready_i) begin
