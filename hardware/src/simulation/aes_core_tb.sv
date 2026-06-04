@@ -257,14 +257,13 @@ module tb_cv32e40p_aes_load;
 
     // perform encryption
     imem[9] = enc_aes_encrypt();
+
     //
     // // store the memory
-    imem[80] = enc_aes_store(5'd0, 5'd0, 12'd32); 
-    imem[82] = enc_aes_store(5'd1, 5'd0, 12'd36); 
-    imem[84] = enc_aes_store(5'd2, 5'd0, 12'd40); 
-    imem[86] = enc_aes_store(5'd3, 5'd0, 12'd44); 
-
-    imem[88] = enc_aes_store(5'd0, 5'd0, 12'd32); 
+    imem[10] = enc_aes_store(5'd0, 5'd0, 12'd32); 
+    imem[11] = enc_aes_store(5'd1, 5'd0, 12'd36); 
+    imem[12] = enc_aes_store(5'd2, 5'd0, 12'd40); 
+    imem[13] = enc_aes_store(5'd3, 5'd0, 12'd44); 
 
     rst_n = 1'b0;
     fetch_enable = 1'b0;

@@ -626,8 +626,8 @@ module cv32e40p_core
       .aes_mem_we_ex_o   (aes_mem_we_ex), 
       .aes_enc_en_o   (aes_enc_en_ex), 
 
-      .aes_ws_id_o         (aes_ws_id),
-      .aes_id_data_i       (aes_id_data),
+      .aes_ws_id_o          (aes_ws_id),
+      .aes_id_data_i        (aes_id_data),
 
       ////////////////////////////////////////////
 

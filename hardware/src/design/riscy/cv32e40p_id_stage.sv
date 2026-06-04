@@ -1493,6 +1493,9 @@ module cv32e40p_id_stage
 
       branch_in_ex_o         <= 1'b0;
 
+      aes_mem_we_ex_o        <= 1'b0;
+      aes_enc_en_o           <= 1'b0;
+
     end else if (data_misaligned_i) begin
       // misaligned data access case
       if (ex_ready_i) begin  // misaligned access case, only unstall alu operands
@@ -1638,6 +1641,10 @@ module cv32e40p_id_stage
         mult_en_ex_o         <= 1'b0;
 
         alu_en_ex_o          <= 1'b1;
+
+        aes_mem_we_ex_o      <= 1'b0;
+
+        aes_enc_en_o         <= 1'b0;
 
       end else if (csr_access_ex_o) begin
         //In the EX stage there was a CSR access, to avoid multiple

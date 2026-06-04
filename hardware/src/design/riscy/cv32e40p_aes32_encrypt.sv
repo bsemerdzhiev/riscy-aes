@@ -19,11 +19,14 @@ module cv32e40p_aes32_encrypt
 );
 
 // fsm states
-typedef enum logic [1:0] {
-  IDLE = 2'd0,
-  STAGE_ONE = 2'd1,
-  STAGE_TWO = 2'd2,
-  DONE = 2'd3
+typedef enum logic [2:0] {
+  IDLE = 3'd0,
+  STAGE_ONE = 3'd1,
+  STAGE_TWO = 3'd2,
+  FLUSH = 3'd3,
+  FLUSH_DONE = 3'd4,
+  START = 3'd5,
+  BEFORE_START = 3'd6
 } aes_state_e;
 
 aes_state_e state_q, state_d;
@@ -139,26 +142,37 @@ always_comb begin
       ready_o = 1'b1; // just idle, so the pipeline can work on smth else
 
       if (enable_i) begin
-        aes_block_d = {plaintext_i[7:0],   plaintext_i[15:8],  plaintext_i[23:16], plaintext_i[31:24],
-               plaintext_i[39:32],  plaintext_i[47:40], plaintext_i[55:48], plaintext_i[63:56],
-               plaintext_i[71:64],  plaintext_i[79:72], plaintext_i[87:80], plaintext_i[95:88],
-               plaintext_i[103:96], plaintext_i[111:104], plaintext_i[119:112], plaintext_i[127:120]};
-        // aes_block_d = plaintext_i;
+        if (round_d == 4'd0) begin
+          ready_o = 1'b0;
 
-        round_key_d = {round_key_i[7:0],   round_key_i[15:8],  round_key_i[23:16], round_key_i[31:24],
-               round_key_i[39:32], round_key_i[47:40], round_key_i[55:48], round_key_i[63:56],
-               round_key_i[71:64], round_key_i[79:72], round_key_i[87:80], round_key_i[95:88],
-               round_key_i[103:96], round_key_i[111:104], round_key_i[119:112], round_key_i[127:120]};
-        // round_key_d = round_key_i;
-
-
-        round_d = 4'd1;
-        state_d = STAGE_ONE;
-
-        aes_block_d = aes_block_d ^ round_key_d;
-
-        round_key_d = key_expand(round_key_d, 4'd1); 
+          state_d = BEFORE_START;
+        end
+      end else begin
+        round_d = 4'd0;
       end
+    end
+
+    BEFORE_START: begin
+      state_d = START;
+    end
+    
+    START: begin
+      aes_block_d = {plaintext_i[7:0],   plaintext_i[15:8],  plaintext_i[23:16], plaintext_i[31:24],
+              plaintext_i[39:32],  plaintext_i[47:40], plaintext_i[55:48], plaintext_i[63:56],
+              plaintext_i[71:64],  plaintext_i[79:72], plaintext_i[87:80], plaintext_i[95:88],
+              plaintext_i[103:96], plaintext_i[111:104], plaintext_i[119:112], plaintext_i[127:120]};
+
+       round_key_d = {round_key_i[7:0],   round_key_i[15:8],  round_key_i[23:16], round_key_i[31:24],
+            round_key_i[39:32], round_key_i[47:40], round_key_i[55:48], round_key_i[63:56],
+            round_key_i[71:64], round_key_i[79:72], round_key_i[87:80], round_key_i[95:88],
+            round_key_i[103:96], round_key_i[111:104], round_key_i[119:112], round_key_i[127:120]};
+
+       round_d = 4'd1;
+       state_d = STAGE_ONE;
+
+       aes_block_d = aes_block_d ^ round_key_d;
+
+       round_key_d = key_expand(round_key_d, 4'd1); 
     end
 
     STAGE_ONE: begin
@@ -179,7 +193,7 @@ always_comb begin
         aes_block_d = aes_mix_columns(aes_block_d);
         state_d = STAGE_ONE;
       end else begin
-        state_d = DONE;
+        state_d = FLUSH;
       end
 
       round_d = round_d + 4'd1;
@@ -188,14 +202,13 @@ always_comb begin
       round_key_d = key_expand(round_key_d, round_d);
     end
 
-    DONE: begin
+    FLUSH: begin
       aes_flush_en_o = 1'b1;
-      ready_o = 1'b1; // just idle, so the pipeline can work on smth else
 
-      // if the result is ready to be latched then go back to idle
-      if (ex_ready_i) begin
-        state_d = IDLE;
-      end
+      state_d = FLUSH_DONE;
+    end
+    FLUSH_DONE: begin
+      state_d = IDLE;
     end
   endcase
 end
