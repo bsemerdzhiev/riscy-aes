@@ -144,6 +144,7 @@ module cv32e40p_ex_stage
     output logic aes_mem_we_wb_o,
 
     input  logic aes_enc_en_i,
+    input  logic aes_dec_en_i,
 
     input  logic [127:0] aes_state_i,
     input  logic [127:0] aes_key_i,
@@ -182,8 +183,16 @@ module cv32e40p_ex_stage
   logic        alu_ready;
   logic        mult_ready;
   logic        aes_ready;
+  logic        aes_enc_ready;
+  logic        aes_dec_ready;
 
   logic        aes_flush;
+  logic        aes_enc_flush;
+  logic        aes_dec_flush;
+  logic        aes_dec_flush_q;
+
+  logic [127:0] aes_enc_state;
+  logic [127:0] aes_dec_state;
 
   // APU signals
   logic        apu_valid;
@@ -314,11 +323,30 @@ module cv32e40p_ex_stage
       .plaintext_i  (aes_state_i),
       .round_key_i  (aes_key_i),
 
-      .ready_o      (aes_ready),
-      .ciphertext_o (aes_state_o),
+      .ready_o      (aes_enc_ready),
+      .ciphertext_o (aes_enc_state),
 
-      .aes_flush_en_o (aes_flush)
+      .aes_flush_en_o (aes_enc_flush)
   );
+
+  cv32e40p_aes32_decrypt aes_decrypt_i(
+      .clk_i        (clk),
+      .rst_ni       (rst_n),
+
+      .enable_i     (aes_dec_en_i),
+
+      .ciphertext_i (aes_state_i),
+      .round_key_i  (aes_key_i),
+
+      .ready_o      (aes_dec_ready),
+      .plaintext_o  (aes_dec_state),
+
+      .aes_flush_en_o (aes_dec_flush)
+  );
+
+  assign aes_ready = aes_enc_ready & aes_dec_ready;
+  assign aes_flush = aes_enc_flush | aes_dec_flush;
+  assign aes_state_o = aes_dec_flush_q ? aes_dec_state : aes_enc_state;
 
   ////////////////////////////////////////////////////////////////
   //  __  __ _   _ _   _____ ___ ____  _     ___ _____ ____     //
@@ -452,16 +480,18 @@ module cv32e40p_ex_stage
       regfile_we_lsu    <= 1'b0;
       aes_mem_we_lsu    <= 1'b0;  //////// AES, set enable to 0 on reset
       aes_flush_we_o    <= 1'b0;
+      aes_dec_flush_q   <= 1'b0;
 
     end else begin
       if (ex_valid_o) // wb_ready_i is implied
       begin
         regfile_we_lsu <= regfile_we_i & ~lsu_err_i;  // For standart reg file
-        
+
         aes_mem_we_lsu <= aes_mem_we_i & ~lsu_err_i;  ////////////////////////////// For AES mem
 
         aes_flush_we_o <= aes_flush    & ~lsu_err_i;
-        
+        aes_dec_flush_q <= aes_dec_flush & ~lsu_err_i;
+
         if ((regfile_we_i | aes_mem_we_i) & ~lsu_err_i) begin
           regfile_waddr_lsu <= regfile_waddr_i;
         end
@@ -471,6 +501,7 @@ module cv32e40p_ex_stage
         regfile_we_lsu <= 1'b0;
         aes_mem_we_lsu <= 1'b0;
         aes_flush_we_o <= 1'b0;
+        aes_dec_flush_q <= 1'b0;
       end
     end
   end
@@ -480,7 +511,7 @@ module cv32e40p_ex_stage
   // depend on ex_ready.
   assign ex_ready_o = (~apu_stall & alu_ready & aes_ready & mult_ready & lsu_ready_ex_i
                        & wb_ready_i & ~wb_contention) | (branch_in_ex_i);
-  assign ex_valid_o = (apu_valid | alu_en_i | aes_enc_en_i | aes_mem_we_i | mult_en_i | csr_access_i | lsu_en_i)
+  assign ex_valid_o = (apu_valid | alu_en_i | aes_enc_en_i | aes_dec_en_i | aes_mem_we_i | mult_en_i | csr_access_i | lsu_en_i)
                        & (alu_ready & mult_ready & lsu_ready_ex_i & wb_ready_i);
 
 endmodule

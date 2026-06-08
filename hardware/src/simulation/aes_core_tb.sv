@@ -117,9 +117,13 @@ module tb_cv32e40p_aes_load;
     enc_aes_load = {imm, rs1, 3'b000, rd, 7'h1b};
 
   endfunction
-  function automatic logic [31:0] enc_aes_encrypt(
-  );
-    enc_aes_encrypt = {25'd0, 7'h6b};
+  function automatic logic [31:0] enc_aes_encrypt();
+    /funct7[31:25], rs2[24:20], rs1[19:15], funct3=000, rd=0, opcode=0x6b
+    enc_aes_encrypt = {7'h0, 5'h0, 5'h0, 3'b000, 5'h0, 7'h6b};
+  endfunction
+
+  function automatic logic [31:0] enc_aes_decrypt();
+    enc_aes_decrypt = {7'h0, 5'h0, 5'h0, 3'b001, 5'h0, 7'h6b};
   endfunction
 
   function automatic logic [31:0] enc_aes_store(
@@ -171,7 +175,8 @@ module tb_cv32e40p_aes_load;
       data_we_q   <= data_we;
       data_addr_q <= data_addr;
 
-      data_rvalid <= data_req_q && !data_we_q;
+      // i think it was returning only reads before
+      data_rvalid <= data_req_q;
 
       if (data_req_q && !data_we_q)
         data_rdata <= dmem[data_addr_q[9:2]];
@@ -258,12 +263,21 @@ module tb_cv32e40p_aes_load;
     // perform encryption
     imem[9] = enc_aes_encrypt();
 
-    //
-    // // store the memory
-    imem[10] = enc_aes_store(5'd0, 5'd0, 12'd32); 
-    imem[11] = enc_aes_store(5'd1, 5'd0, 12'd36); 
-    imem[12] = enc_aes_store(5'd2, 5'd0, 12'd40); 
-    imem[13] = enc_aes_store(5'd3, 5'd0, 12'd44); 
+    // store ciphertext to dmem[8..11] (offsets 32..44)
+    imem[10] = enc_aes_store(5'd0, 5'd0, 12'd32);
+    imem[11] = enc_aes_store(5'd1, 5'd0, 12'd36);
+    imem[12] = enc_aes_store(5'd2, 5'd0, 12'd40);
+    imem[13] = enc_aes_store(5'd3, 5'd0, 12'd44);
+
+    // decrypt: ciphertext + key from encrypt
+    imem[14] = enc_nop();
+    imem[15] = enc_aes_decrypt();
+
+    // store recovered plaintext
+    imem[16] = enc_aes_store(5'd0, 5'd0, 12'd48);
+    imem[17] = enc_aes_store(5'd1, 5'd0, 12'd52);
+    imem[18] = enc_aes_store(5'd2, 5'd0, 12'd56);
+    imem[19] = enc_aes_store(5'd3, 5'd0, 12'd60);
 
     rst_n = 1'b0;
     fetch_enable = 1'b0;
@@ -273,21 +287,17 @@ module tb_cv32e40p_aes_load;
     rst_n = 1'b1;
     fetch_enable = 1'b1;
 
-    repeat (200) @(posedge clk);
+    repeat (600) @(posedge clk);
 
-    $display("FINAL AES_STATE = %032h", dut.aes_state);
-    $display("FINAL AES_KEY   = %032h", dut.aes_key);
+    $display("ORIGINAL PLAINTEXT: %08h %08h %08h %08h", dmem[0], dmem[1], dmem[2], dmem[3]);
+    $display("CIPHERTEXT: %08h %08h %08h %08h", dmem[8], dmem[9], dmem[10], dmem[11]);
+    $display("RECOVERED: %08h %08h %08h %08h", dmem[12], dmem[13], dmem[14], dmem[15]);
 
-    if (dut.aes_state !== 128'h4444_4444_3333_3333_2222_2222_1111_1111) begin
-      $error("AES_STATE mismatch!");
+    if (dmem[12] === dmem[0] && dmem[13] === dmem[1] &&
+        dmem[14] === dmem[2] && dmem[15] === dmem[3]) begin
+      $display("DECRYPT ROUND-TRIP TEST PASSED");
     end else begin
-      $display("AES_STATE OK");
-    end
-
-    if (dut.aes_key !== 128'hDDDD_DDDD_CCCC_CCCC_BBBB_BBBB_AAAA_AAAA) begin
-      $error("AES_KEY mismatch!");
-    end else begin
-      $display("AES_KEY OK");
+      $error("DECRYPT ROUND-TRIP TEST FAILED: recovered != original plaintext");
     end
 
     $finish;

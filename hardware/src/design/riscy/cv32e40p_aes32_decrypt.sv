@@ -258,6 +258,9 @@ always_comb begin
     end
 
     STAGE_TWO: begin
+      round_key_d = key_expand_inv(round_key_d, round_d);
+      aes_block_d = aes_block_d ^ round_key_d;
+
       if (round_d < 4'd10) begin
         aes_block_d = aes_mix_columns_inv(aes_block_d);
         state_d = STAGE_ONE;
@@ -265,9 +268,6 @@ always_comb begin
         state_d = FLUSH;
       end
 
-      aes_block_d = aes_block_d ^ round_key_d;
-
-      round_key_d = key_expand_inv(round_key_d, round_d);
       round_d = round_d + 4'd1;
     end
 
