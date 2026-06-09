@@ -36,7 +36,20 @@ let hasSideEffects = 1, mayLoad = 0, mayStore = 0 in
 def AES_ENCRYPT : RVInst<(outs), (ins),
                            "aes.encrypt", "",
                            [], InstFormatR> {
-  let Inst{31-7} = 0;
+  let Inst{31-15} = 0;
+  let Inst{14-12}  = 0b000;
+  let Inst{11-7} = 0;
+  let Inst{6-0}  = 0x6b;
+}
+
+// R-type (no operands beyond opcode): AES_ENCRYPT
+let hasSideEffects = 1, mayLoad = 0, mayStore = 0 in
+def AES_DECRYPT : RVInst<(outs), (ins),
+                           "aes.decrypt", "",
+                           [], InstFormatR> {
+  let Inst{31-15} = 0;
+  let Inst{14-12}  = 0b001;
+  let Inst{11-7} = 0;
   let Inst{6-0}  = 0x6b;
 }
 
