@@ -8,7 +8,7 @@ Discarded input sections
  .llvm_addrsig  0x00000000        0x0 include/int.o
  .llvm_addrsig  0x00000000        0x0 include/tcutils.o
  .llvm_addrsig  0x00000000        0x0 include/utils.o
- .llvm_addrsig  0x00000000        0x0 main.o
+ .llvm_addrsig  0x00000000        0x0 main_decrypt2.o
 
 Memory Configuration
 
@@ -38,7 +38,7 @@ Linker script and memory map
  .text          0x00008074        0x0 include/int.o
  .text          0x00008074        0x0 include/tcutils.o
  .text          0x00008074        0x0 include/utils.o
- .text          0x00008074        0x0 main.o
+ .text          0x00008074        0x0 main_decrypt2.o
  .text          0x00008074      0x1a8 crt0.riscv.o
                 0x000080ba                _start
                 0x0000821a                _init
@@ -167,27 +167,9 @@ Linker script and memory map
                 0x000082d2       0x1a include/utils.o
                 0x000082d2                sleep_busy
 
-.text.aes128_ecb_encrypt
-                0x000082ec       0x3c
- .text.aes128_ecb_encrypt
-                0x000082ec       0x3c main.o
-                0x000082ec                aes128_ecb_encrypt
-
-.text.write_to_address
-                0x00008328        0x4
- .text.write_to_address
-                0x00008328        0x4 main.o
-                0x00008328                write_to_address
-
-.text.write_v_to_address
-                0x0000832c       0x12
- .text.write_v_to_address
-                0x0000832c       0x12 main.o
-                0x0000832c                write_v_to_address
-
-.text.main      0x0000833e       0xbe
- .text.main     0x0000833e       0xbe main.o
-                0x0000833e                main
+.text.main      0x000082ec       0xea
+ .text.main     0x000082ec       0xea main_decrypt2.o
+                0x000082ec                main
 
 .preinit_array  0x00100000        0x0
                 [!provide]                        PROVIDE (__preinit_array_start = .)
@@ -210,7 +192,7 @@ Linker script and memory map
                 0x00100000                        . = ALIGN (0x4)
  *(.rodata)
  *(.rodata.*)
- .rodata.cst16  0x00100000       0x20 main.o
+ .rodata.cst16  0x00100000       0x20 main_decrypt2.o
 
 .rela.dyn       0x00100020        0x0
  .rela.text     0x00100020        0x0 include/tcutils.o
@@ -260,28 +242,28 @@ LOAD include/exceptions.o
 LOAD include/int.o
 LOAD include/tcutils.o
 LOAD include/utils.o
-LOAD main.o
+LOAD main_decrypt2.o
 LOAD crt0.riscv.o
 OUTPUT(output/soft.elf elf32-littleriscv)
 
-.debug_abbrev   0x00000000      0x372
+.debug_abbrev   0x00000000      0x31c
  .debug_abbrev  0x00000000       0x31 include/exceptions.o
  .debug_abbrev  0x00000031       0x31 include/int.o
  .debug_abbrev  0x00000062       0xc2 include/tcutils.o
  .debug_abbrev  0x00000124       0xcf include/utils.o
- .debug_abbrev  0x000001f3      0x160 main.o
- .debug_abbrev  0x00000353       0x1f crt0.riscv.o
+ .debug_abbrev  0x000001f3      0x10a main_decrypt2.o
+ .debug_abbrev  0x000002fd       0x1f crt0.riscv.o
 
-.debug_info     0x00000000      0x879
+.debug_info     0x00000000      0x7e7
  .debug_info    0x00000000       0x49 include/exceptions.o
  .debug_info    0x00000049       0x8b include/int.o
  .debug_info    0x000000d4      0x1c8 include/tcutils.o
  .debug_info    0x0000029c       0xa8 include/utils.o
- .debug_info    0x00000344      0x28a main.o
- .debug_info    0x000005ce      0x2ab crt0.riscv.o
+ .debug_info    0x00000344      0x1f8 main_decrypt2.o
+ .debug_info    0x0000053c      0x2ab crt0.riscv.o
 
 .debug_rnglists
-                0x00000000       0xe6
+                0x00000000       0xe0
  .debug_rnglists
                 0x00000000       0x1a include/exceptions.o
  .debug_rnglists
@@ -291,9 +273,9 @@ OUTPUT(output/soft.elf elf32-littleriscv)
  .debug_rnglists
                 0x00000069       0x1a include/utils.o
  .debug_rnglists
-                0x00000083       0x48 main.o
+                0x00000083       0x42 main_decrypt2.o
  .debug_rnglists
-                0x000000cb       0x1b crt0.riscv.o
+                0x000000c5       0x1b crt0.riscv.o
 
 .debug_str_offsets
                 0x00000000      0x194
@@ -306,26 +288,26 @@ OUTPUT(output/soft.elf elf32-littleriscv)
  .debug_str_offsets
                 0x000000ec       0x2c include/utils.o
  .debug_str_offsets
-                0x00000118       0x7c main.o
+                0x00000118       0x7c main_decrypt2.o
 
-.debug_str      0x00000000      0x2f2
- .debug_str     0x00000000      0x2f2 include/exceptions.o
+.debug_str      0x00000000      0x2de
+ .debug_str     0x00000000      0x2de include/exceptions.o
                                  0xfa (size before relaxing)
- .debug_str     0x000002f2        0x0 include/int.o
+ .debug_str     0x000002de        0x0 include/int.o
                                 0x105 (size before relaxing)
- .debug_str     0x000002f2        0x0 include/tcutils.o
+ .debug_str     0x000002de        0x0 include/tcutils.o
                                 0x173 (size before relaxing)
- .debug_str     0x000002f2        0x0 include/utils.o
+ .debug_str     0x000002de        0x0 include/utils.o
                                  0xcc (size before relaxing)
- .debug_str     0x000002f2        0x0 main.o
-                                0x1ac (size before relaxing)
+ .debug_str     0x000002de        0x0 main_decrypt2.o
+                                0x193 (size before relaxing)
 
-.debug_addr     0x00000000       0xa4
+.debug_addr     0x00000000       0x90
  .debug_addr    0x00000000       0x14 include/exceptions.o
  .debug_addr    0x00000014       0x2c include/int.o
  .debug_addr    0x00000040       0x20 include/tcutils.o
  .debug_addr    0x00000060       0x18 include/utils.o
- .debug_addr    0x00000078       0x2c main.o
+ .debug_addr    0x00000078       0x18 main_decrypt2.o
 
 .comment        0x00000000       0x6c
  .comment       0x00000000       0x6c include/exceptions.o
@@ -336,7 +318,7 @@ OUTPUT(output/soft.elf elf32-littleriscv)
                                  0x6d (size before relaxing)
  .comment       0x0000006c        0x0 include/utils.o
                                  0x6d (size before relaxing)
- .comment       0x0000006c        0x0 main.o
+ .comment       0x0000006c        0x0 main_decrypt2.o
                                  0x6d (size before relaxing)
 
 .note.GNU-stack
@@ -350,7 +332,7 @@ OUTPUT(output/soft.elf elf32-littleriscv)
  .note.GNU-stack
                 0x00000000        0x0 include/utils.o
  .note.GNU-stack
-                0x00000000        0x0 main.o
+                0x00000000        0x0 main_decrypt2.o
 
 .riscv.attributes
                 0x00000000       0x5f
@@ -363,54 +345,54 @@ OUTPUT(output/soft.elf elf32-littleriscv)
  .riscv.attributes
                 0x0000011d       0x5f include/utils.o
  .riscv.attributes
-                0x0000017c       0x5f main.o
+                0x0000017c       0x5f main_decrypt2.o
  .riscv.attributes
                 0x000001db       0x5d crt0.riscv.o
 
-.debug_frame    0x00000000      0x218
+.debug_frame    0x00000000      0x1e4
  .debug_frame   0x00000000       0x44 include/exceptions.o
  .debug_frame   0x00000044       0xa4 include/int.o
  .debug_frame   0x000000e8       0x84 include/tcutils.o
  .debug_frame   0x0000016c       0x4c include/utils.o
- .debug_frame   0x000001b8       0x60 main.o
+ .debug_frame   0x000001b8       0x2c main_decrypt2.o
 
-.debug_line     0x00000000      0x77e
+.debug_line     0x00000000      0x6df
  .debug_line    0x00000000       0x82 include/exceptions.o
  .debug_line    0x00000082      0x100 include/int.o
  .debug_line    0x00000182      0x1c6 include/tcutils.o
  .debug_line    0x00000348       0xa6 include/utils.o
- .debug_line    0x000003ee      0x185 main.o
- .debug_line    0x00000573      0x20b crt0.riscv.o
+ .debug_line    0x000003ee       0xe6 main_decrypt2.o
+ .debug_line    0x000004d4      0x20b crt0.riscv.o
 
 .debug_line_str
-                0x00000000      0x130
+                0x00000000      0x139
  .debug_line_str
-                0x00000000      0x130 include/exceptions.o
+                0x00000000      0x139 include/exceptions.o
                                  0x46 (size before relaxing)
  .debug_line_str
-                0x00000130        0x0 include/int.o
+                0x00000139        0x0 include/int.o
                                  0x3f (size before relaxing)
  .debug_line_str
-                0x00000130        0x0 include/tcutils.o
+                0x00000139        0x0 include/tcutils.o
                                  0xf2 (size before relaxing)
  .debug_line_str
-                0x00000130        0x0 include/utils.o
+                0x00000139        0x0 include/utils.o
                                  0x41 (size before relaxing)
  .debug_line_str
-                0x00000130        0x0 main.o
-                                 0xe7 (size before relaxing)
+                0x00000139        0x0 main_decrypt2.o
+                                 0xb6 (size before relaxing)
  .debug_line_str
-                0x00000130        0x0 crt0.riscv.o
+                0x00000139        0x0 crt0.riscv.o
                                  0x3e (size before relaxing)
 
 .debug_loclists
-                0x00000000      0x3b1
+                0x00000000      0x30c
  .debug_loclists
                 0x00000000      0x15d include/tcutils.o
  .debug_loclists
                 0x0000015d       0x1f include/utils.o
  .debug_loclists
-                0x0000017c      0x235 main.o
+                0x0000017c      0x190 main_decrypt2.o
 
 .debug_aranges  0x00000000       0x28
  .debug_aranges
