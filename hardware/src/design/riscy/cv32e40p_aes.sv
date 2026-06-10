@@ -72,55 +72,18 @@ gf_mult u_col_two   (.a(8'h03), .b(col), .result(results_enc[1]));
 logic [7:0] results_dec[0:3];
 
 gf_mult u_col_one_dec (.a(8'h0e), .b(col), .result(results_dec[0]));
-gf_mult u_col_two_dec (.a(8'h0b), .b(col), .result(results_dec[1]));
+gf_mult u_col_two_dec (.a(8'h09), .b(col), .result(results_dec[1]));
 gf_mult u_col_three_dec (.a(8'h0d), .b(col), .result(results_dec[2]));
-gf_mult u_col_four_dec (.a(8'h09), .b(col), .result(results_dec[3]));
+gf_mult u_col_four_dec (.a(8'h0b), .b(col), .result(results_dec[3]));
 
 
 always_comb begin
   result = 32'h0;
-/*
-  case(bs)
-    2'd0: begin
-      if (direction == '0) begin
-        result = {results_enc[1], col, col, results_enc[0]};
-      end else begin
-        result = {results_dec[0], results_dec[1], results_dec[2], results_dec[3]};
-      end
-    end
-
-    2'd1: begin
-      if (direction == '0) begin
-        result = {col, col, results_enc[0], results_enc[1]};
-      end else begin
-        result = {results_dec[3], results_dec[0], results_dec[1], results_dec[2]};
-      end
-    end
-
-    2'd2: begin
-      if (direction == '0) begin
-        result = {col, results_enc[0], results_enc[1], col};
-      end else begin
-        result = {results_dec[2], results_dec[3], results_dec[0], results_dec[1]};
-      end
-    end
-
-    2'd3: begin
-      if (direction == '0) begin
-        result = {results_enc[0], results_enc[1], col, col};
-      end else begin
-        result = {results_dec[1], results_dec[2], results_dec[3], results_dec[0]};
-      end
-    end
-  endcase
-  */
   if (direction == '0) begin
         result = {results_enc[1], col, col, results_enc[0]};
   end else begin
-        result = {results_dec[0], results_dec[1], results_dec[2], results_dec[3]};
+        result = {results_dec[3], results_dec[2], results_dec[1], results_dec[0]};
   end
-  
-  
 end
 endmodule
 
