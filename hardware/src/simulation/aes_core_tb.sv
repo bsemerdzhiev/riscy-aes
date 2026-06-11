@@ -118,7 +118,7 @@ module tb_cv32e40p_aes_load;
 
   endfunction
   function automatic logic [31:0] enc_aes_encrypt();
-    /funct7[31:25], rs2[24:20], rs1[19:15], funct3=000, rd=0, opcode=0x6b
+    // funct7[31:25], rs2[24:20], rs1[19:15], funct3=000, rd=0, opcode=0x6b
     enc_aes_encrypt = {7'h0, 5'h0, 5'h0, 3'b000, 5'h0, 7'h6b};
   endfunction
 
