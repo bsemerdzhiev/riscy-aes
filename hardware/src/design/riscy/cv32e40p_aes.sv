@@ -125,11 +125,6 @@ assign direction = chosen_op_i[1];
 
 mix_columns mix_columns_i(.col(mix_columns_col_i), .bs(bs_i), .direction(direction), .result(mix_columns_o));
 
-//assign aes_o = (chosen_op_i == 2'b00 || chosen_op_i == 2'b10) ? (key_i ^ {24'h0, sbox_output}): (key_i ^ mix_columns_o);
-//assign aes_o = chosen_op_i[0] ?
-//              (key_i ^ mix_columns_o) :
-//               (key_i ^ {24'h0, sbox_output});
-
 assign sbox_word = {24'h0, sbox_output};
 
 assign transformed_word = chosen_op_i[0] ? 
@@ -146,8 +141,6 @@ always_comb begin
 end
 
 assign aes_o = key_i ^ rotated_word;
-
-
                
 always_comb begin
   shamt = {bs_i, 3'b0};

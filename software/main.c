@@ -180,6 +180,7 @@ void aes128_encrypt_block(uint8_t *plaintext, uint8_t *round_keys,
     __asm__ volatile("aes32esmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[0])
                      : "r"(round_key_ptr[0]), "r"(state_ptr[3]), "I"(3));
+
     __asm__ volatile("aes32esmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[1])
                      : "r"(round_key_ptr[1]), "r"(state_ptr[1]), "I"(0));
@@ -192,6 +193,7 @@ void aes128_encrypt_block(uint8_t *plaintext, uint8_t *round_keys,
     __asm__ volatile("aes32esmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[1])
                      : "r"(round_key_ptr[1]), "r"(state_ptr[0]), "I"(3));
+
     __asm__ volatile("aes32esmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[2])
                      : "r"(round_key_ptr[2]), "r"(state_ptr[2]), "I"(0));
@@ -204,6 +206,7 @@ void aes128_encrypt_block(uint8_t *plaintext, uint8_t *round_keys,
     __asm__ volatile("aes32esmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[2])
                      : "r"(round_key_ptr[2]), "r"(state_ptr[1]), "I"(3));
+
     __asm__ volatile("aes32esmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[3])
                      : "r"(round_key_ptr[3]), "r"(state_ptr[3]), "I"(0));
@@ -359,19 +362,19 @@ int main() {
 
   addr = 0x0100000 + 0x2000 + 0x50;
 
-  uint8_t res_from_aes32esmi[16];
-  uint32_t *aes32esmi_ptr = (uint32_t *)res_from_aes32esmi;
+  // uint8_t res_from_aes32esmi[16];
+  // uint32_t *aes32esmi_ptr = (uint32_t *)res_from_aes32esmi;
 
-  uint32_t chosen_byte = 0;
-
-  aes32esmi_ptr[0] = 0xe7aeaa00;
-  chosen_byte = 0xa8c81b9f;
-
-  __asm__ volatile("aes32esmi %0, %1, %2, %3"
-                   : "+r"(aes32esmi_ptr[0])
-                   : "r"(aes32esmi_ptr[0]), "r"(chosen_byte), "I"(1));
-
-  write_numb_to_address(addr, res_from_aes32esmi);
+  // uint32_t chosen_byte = 0;
+  //
+  // aes32esmi_ptr[0] = 0xe7aeaa00;
+  // chosen_byte = 0xa8c81b9f;
+  //
+  // __asm__ volatile("aes32esmi %0, %1, %2, %3"
+  //                  : "+r"(aes32esmi_ptr[0])
+  //                  : "r"(aes32esmi_ptr[0]), "r"(chosen_byte), "I"(1));
+  //
+  // write_numb_to_address(addr, res_from_aes32esmi);
 
   // Check if calculated and expected match:
   addr = 0x0100000 + 0x2000 +

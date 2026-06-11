@@ -58,68 +58,68 @@ void expand_key(uint8_t *key, uint8_t *round_keys) {
   }
 }
 
-// SubBytes transformation
-void sub_bytes(uint8_t *state) {
-  for (int i = 0; i < 16; i++) {
-    state[i] = sbox[state[i]];
-  }
-}
-
-// ShiftRows transformation
-void shift_rows(uint8_t *state) {
-  uint8_t temp;
-  temp = state[1];
-  state[1] = state[5];
-  state[5] = state[9];
-  state[9] = state[13];
-  state[13] = temp;
-  temp = state[2];
-  state[2] = state[10];
-  state[10] = temp;
-  temp = state[6];
-  state[6] = state[14];
-  state[14] = temp;
-  temp = state[15];
-  state[15] = state[11];
-  state[11] = state[7];
-  state[7] = state[3];
-  state[3] = temp;
-}
-
-// GF(2^8) multiplication
-uint8_t gf_mult(uint8_t a, uint8_t b) {
-  uint8_t p = 0;
-  for (int i = 0; i < 8; i++) {
-    if (b & 1)
-      p ^= a;
-    uint8_t hi_bit = a & 0x80;
-    a <<= 1;
-    if (hi_bit)
-      a ^= 0x1b; // Reduce modulo 0x11b
-    b >>= 1;
-  }
-  return p;
-}
-
-// MixColumns transformation
-void mix_columns(uint8_t *state) {
-  uint8_t temp[16];
-  for (int i = 0; i < 4; i++) {
-    int idx = i * 4;
-    temp[idx] = gf_mult(0x02, state[idx]) ^ gf_mult(0x03, state[idx + 1]) ^
-                state[idx + 2] ^ state[idx + 3];
-    temp[idx + 1] = state[idx] ^ gf_mult(0x02, state[idx + 1]) ^
-                    gf_mult(0x03, state[idx + 2]) ^ state[idx + 3];
-    temp[idx + 2] = state[idx] ^ state[idx + 1] ^
-                    gf_mult(0x02, state[idx + 2]) ^
-                    gf_mult(0x03, state[idx + 3]);
-    temp[idx + 3] = gf_mult(0x03, state[idx]) ^ state[idx + 1] ^
-                    state[idx + 2] ^ gf_mult(0x02, state[idx + 3]);
-  }
-  for (int i = 0; i < 16; i++) {
-    state[i] = temp[i];
-  }
-}
+// // SubBytes transformation
+// void sub_bytes(uint8_t *state) {
+//   for (int i = 0; i < 16; i++) {
+//     state[i] = sbox[state[i]];
+//   }
+// }
+//
+// // ShiftRows transformation
+// void shift_rows(uint8_t *state) {
+//   uint8_t temp;
+//   temp = state[1];
+//   state[1] = state[5];
+//   state[5] = state[9];
+//   state[9] = state[13];
+//   state[13] = temp;
+//   temp = state[2];
+//   state[2] = state[10];
+//   state[10] = temp;
+//   temp = state[6];
+//   state[6] = state[14];
+//   state[14] = temp;
+//   temp = state[15];
+//   state[15] = state[11];
+//   state[11] = state[7];
+//   state[7] = state[3];
+//   state[3] = temp;
+// }
+//
+// // GF(2^8) multiplication
+// uint8_t gf_mult(uint8_t a, uint8_t b) {
+//   uint8_t p = 0;
+//   for (int i = 0; i < 8; i++) {
+//     if (b & 1)
+//       p ^= a;
+//     uint8_t hi_bit = a & 0x80;
+//     a <<= 1;
+//     if (hi_bit)
+//       a ^= 0x1b; // Reduce modulo 0x11b
+//     b >>= 1;
+//   }
+//   return p;
+// }
+//
+// // MixColumns transformation
+// void mix_columns(uint8_t *state) {
+//   uint8_t temp[16];
+//   for (int i = 0; i < 4; i++) {
+//     int idx = i * 4;
+//     temp[idx] = gf_mult(0x02, state[idx]) ^ gf_mult(0x03, state[idx + 1]) ^
+//                 state[idx + 2] ^ state[idx + 3];
+//     temp[idx + 1] = state[idx] ^ gf_mult(0x02, state[idx + 1]) ^
+//                     gf_mult(0x03, state[idx + 2]) ^ state[idx + 3];
+//     temp[idx + 2] = state[idx] ^ state[idx + 1] ^
+//                     gf_mult(0x02, state[idx + 2]) ^
+//                     gf_mult(0x03, state[idx + 3]);
+//     temp[idx + 3] = gf_mult(0x03, state[idx]) ^ state[idx + 1] ^
+//                     state[idx + 2] ^ gf_mult(0x02, state[idx + 3]);
+//   }
+//   for (int i = 0; i < 16; i++) {
+//     state[i] = temp[i];
+//   }
+// }
 
 // AddRoundKey transformation
 void add_round_key(uint8_t *state, uint8_t *round_key) {
@@ -128,31 +128,6 @@ void add_round_key(uint8_t *state, uint8_t *round_key) {
   }
 }
 
-// // Single block AES-128 encryption
-// void aes128_encrypt_block(uint8_t *plaintext, uint8_t *round_keys, uint8_t
-// *ciphertext) {
-//     uint8_t state[16];
-//     memcpy(state, plaintext, 16);
-//
-//     // Initial round
-//     add_round_key(state, round_keys);
-//
-//     // Main rounds (1 to 9)
-//     for (int round = 1; round < 10; round++) {
-//         sub_bytes(state);
-//         shift_rows(state);
-//         mix_columns(state);
-//         add_round_key(state, &round_keys[round * 16]);
-//     }
-//
-//     // Final round (10)
-//     sub_bytes(state);
-//     shift_rows(state);
-//     add_round_key(state, &round_keys[10 * 16]);
-//
-//     memcpy(ciphertext, state, 16);
-// }
-//
 // Single block AES-128 decryption
 void aes128_decrypt_block(uint8_t *plaintext, uint8_t *round_keys,
                           uint8_t *ciphertext) {
@@ -164,7 +139,7 @@ void aes128_decrypt_block(uint8_t *plaintext, uint8_t *round_keys,
 
   // Main rounds (1 to 9):
   // https://riscvonomicon.github.io/book/extensions/zk/zkned/32bit.html#middle-round-implementation
-  for (int round = 9; round >= 1; round--) {
+  for (int round = 9; round >= 10; round--) {
     uint32_t *state_ptr = (uint32_t *)state;
     uint32_t *round_key_ptr = (uint32_t *)&round_keys[round * 16];
     // aes32esmi rd rs1 rs2 bs
@@ -231,75 +206,75 @@ void aes128_decrypt_block(uint8_t *plaintext, uint8_t *round_keys,
   uint32_t *final_round_key_ptr = (uint32_t *)&round_keys[0];
 
   // aes32esi rd, rs1, rs2, bs
-  __asm__ volatile("aes32dsi %0, %1, %2, %3"
-                   : "+r"(final_round_key_ptr[0])
-                   : "r"(final_round_key_ptr[0]), "r"(final_state_ptr[0]),
-                     "I"(0));
-  __asm__ volatile("aes32dsi %0, %1, %2, %3"
-                   : "+r"(final_round_key_ptr[0])
-                   : "r"(final_round_key_ptr[0]), "r"(final_state_ptr[3]),
-                     "I"(1));
-  __asm__ volatile("aes32dsi %0, %1, %2, %3"
-                   : "+r"(final_round_key_ptr[0])
-                   : "r"(final_round_key_ptr[0]), "r"(final_state_ptr[2]),
-                     "I"(2));
-  __asm__ volatile("aes32dsi %0, %1, %2, %3"
-                   : "+r"(final_round_key_ptr[0])
-                   : "r"(final_round_key_ptr[0]), "r"(final_state_ptr[1]),
-                     "I"(3));
-
-  __asm__ volatile("aes32dsi %0, %1, %2, %3"
-                   : "+r"(final_round_key_ptr[1])
-                   : "r"(final_round_key_ptr[1]), "r"(final_state_ptr[1]),
-                     "I"(0));
-  __asm__ volatile("aes32dsi %0, %1, %2, %3"
-                   : "+r"(final_round_key_ptr[1])
-                   : "r"(final_round_key_ptr[1]), "r"(final_state_ptr[0]),
-                     "I"(1));
-  __asm__ volatile("aes32dsi %0, %1, %2, %3"
-                   : "+r"(final_round_key_ptr[1])
-                   : "r"(final_round_key_ptr[1]), "r"(final_state_ptr[3]),
-                     "I"(2));
-  __asm__ volatile("aes32dsi %0, %1, %2, %3"
-                   : "+r"(final_round_key_ptr[1])
-                   : "r"(final_round_key_ptr[1]), "r"(final_state_ptr[2]),
-                     "I"(3));
-
-  __asm__ volatile("aes32dsi %0, %1, %2, %3"
-                   : "+r"(final_round_key_ptr[2])
-                   : "r"(final_round_key_ptr[2]), "r"(final_state_ptr[2]),
-                     "I"(0));
-  __asm__ volatile("aes32dsi %0, %1, %2, %3"
-                   : "+r"(final_round_key_ptr[2])
-                   : "r"(final_round_key_ptr[2]), "r"(final_state_ptr[1]),
-                     "I"(1));
-  __asm__ volatile("aes32dsi %0, %1, %2, %3"
-                   : "+r"(final_round_key_ptr[2])
-                   : "r"(final_round_key_ptr[2]), "r"(final_state_ptr[0]),
-                     "I"(2));
-  __asm__ volatile("aes32dsi %0, %1, %2, %3"
-                   : "+r"(final_round_key_ptr[2])
-                   : "r"(final_round_key_ptr[2]), "r"(final_state_ptr[3]),
-                     "I"(3));
-
-  __asm__ volatile("aes32dsi %0, %1, %2, %3"
-                   : "+r"(final_round_key_ptr[3])
-                   : "r"(final_round_key_ptr[3]), "r"(final_state_ptr[3]),
-                     "I"(0));
-  __asm__ volatile("aes32dsi %0, %1, %2, %3"
-                   : "+r"(final_round_key_ptr[3])
-                   : "r"(final_round_key_ptr[3]), "r"(final_state_ptr[2]),
-                     "I"(1));
-  __asm__ volatile("aes32dsi %0, %1, %2, %3"
-                   : "+r"(final_round_key_ptr[3])
-                   : "r"(final_round_key_ptr[3]), "r"(final_state_ptr[1]),
-                     "I"(2));
-  __asm__ volatile("aes32dsi %0, %1, %2, %3"
-                   : "+r"(final_round_key_ptr[3])
-                   : "r"(final_round_key_ptr[3]), "r"(final_state_ptr[0]),
-                     "I"(3));
-
-  memcpy(plaintext, final_round_key_ptr, 16);
+  // __asm__ volatile("aes32dsi %0, %1, %2, %3"
+  //                  : "+r"(final_round_key_ptr[0])
+  //                  : "r"(final_round_key_ptr[0]), "r"(final_state_ptr[0]),
+  //                    "I"(0));
+  // __asm__ volatile("aes32dsi %0, %1, %2, %3"
+  //                  : "+r"(final_round_key_ptr[0])
+  //                  : "r"(final_round_key_ptr[0]), "r"(final_state_ptr[3]),
+  //                    "I"(1));
+  // __asm__ volatile("aes32dsi %0, %1, %2, %3"
+  //                  : "+r"(final_round_key_ptr[0])
+  //                  : "r"(final_round_key_ptr[0]), "r"(final_state_ptr[2]),
+  //                    "I"(2));
+  // __asm__ volatile("aes32dsi %0, %1, %2, %3"
+  //                  : "+r"(final_round_key_ptr[0])
+  //                  : "r"(final_round_key_ptr[0]), "r"(final_state_ptr[1]),
+  //                    "I"(3));
+  //
+  // __asm__ volatile("aes32dsi %0, %1, %2, %3"
+  //                  : "+r"(final_round_key_ptr[1])
+  //                  : "r"(final_round_key_ptr[1]), "r"(final_state_ptr[1]),
+  //                    "I"(0));
+  // __asm__ volatile("aes32dsi %0, %1, %2, %3"
+  //                  : "+r"(final_round_key_ptr[1])
+  //                  : "r"(final_round_key_ptr[1]), "r"(final_state_ptr[0]),
+  //                    "I"(1));
+  // __asm__ volatile("aes32dsi %0, %1, %2, %3"
+  //                  : "+r"(final_round_key_ptr[1])
+  //                  : "r"(final_round_key_ptr[1]), "r"(final_state_ptr[3]),
+  //                    "I"(2));
+  // __asm__ volatile("aes32dsi %0, %1, %2, %3"
+  //                  : "+r"(final_round_key_ptr[1])
+  //                  : "r"(final_round_key_ptr[1]), "r"(final_state_ptr[2]),
+  //                    "I"(3));
+  //
+  // __asm__ volatile("aes32dsi %0, %1, %2, %3"
+  //                  : "+r"(final_round_key_ptr[2])
+  //                  : "r"(final_round_key_ptr[2]), "r"(final_state_ptr[2]),
+  //                    "I"(0));
+  // __asm__ volatile("aes32dsi %0, %1, %2, %3"
+  //                  : "+r"(final_round_key_ptr[2])
+  //                  : "r"(final_round_key_ptr[2]), "r"(final_state_ptr[1]),
+  //                    "I"(1));
+  // __asm__ volatile("aes32dsi %0, %1, %2, %3"
+  //                  : "+r"(final_round_key_ptr[2])
+  //                  : "r"(final_round_key_ptr[2]), "r"(final_state_ptr[0]),
+  //                    "I"(2));
+  // __asm__ volatile("aes32dsi %0, %1, %2, %3"
+  //                  : "+r"(final_round_key_ptr[2])
+  //                  : "r"(final_round_key_ptr[2]), "r"(final_state_ptr[3]),
+  //                    "I"(3));
+  //
+  // __asm__ volatile("aes32dsi %0, %1, %2, %3"
+  //                  : "+r"(final_round_key_ptr[3])
+  //                  : "r"(final_round_key_ptr[3]), "r"(final_state_ptr[3]),
+  //                    "I"(0));
+  // __asm__ volatile("aes32dsi %0, %1, %2, %3"
+  //                  : "+r"(final_round_key_ptr[3])
+  //                  : "r"(final_round_key_ptr[3]), "r"(final_state_ptr[2]),
+  //                    "I"(1));
+  // __asm__ volatile("aes32dsi %0, %1, %2, %3"
+  //                  : "+r"(final_round_key_ptr[3])
+  //                  : "r"(final_round_key_ptr[3]), "r"(final_state_ptr[1]),
+  //                    "I"(2));
+  // __asm__ volatile("aes32dsi %0, %1, %2, %3"
+  //                  : "+r"(final_round_key_ptr[3])
+  //                  : "r"(final_round_key_ptr[3]), "r"(final_state_ptr[0]),
+  //                    "I"(3));
+  //
+  memcpy(plaintext, final_state_ptr, 16);
 }
 
 // AES-128 ECB encryption (no padding)
