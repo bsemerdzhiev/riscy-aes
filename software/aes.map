@@ -1532,70 +1532,52 @@
     8e68     8e68        0     1                 .L0 
     8e6a     8e6a        0     1                 .L0 
     8e6a     8e6a        0     1                 .L0 
-    8e6a     8e6a       be     2 .text.main
-    8e6a     8e6a       be     2         software_sol.o:(.text.main)
+    8e6a     8e6a       80     2 .text.main
+    8e6a     8e6a       80     2         software_sol.o:(.text.main)
     8e6a     8e6a        0     1                 .L0 
     8e6a     8e6a        0     1                 .L0 
     8e6a     8e6a        0     1                 $x
     8e6a     8e6a        0     1                 .L0 
-    8e6a     8e6a       be     1                 main
-    8e74     8e74        0     1                 .L0 
-    8e78     8e78        0     1                 .L0 
-    8e92     8e92        0     1                 .L0 
-    8e92     8e92        0     1                 .L0 
-    8ea2     8ea2        0     1                 .L0 
-    8ea2     8ea2        0     1                 .L0 
-    8eae     8eae        0     1                 .L0 
-    8eae     8eae        0     1                 .L0 
+    8e6a     8e6a       80     1                 main
+    8e6c     8e6c        0     1                 .L0 
+    8e86     8e86        0     1                 .L0 
+    8e86     8e86        0     1                 .L0 
+    8e90     8e90        0     1                 .L0 
+    8e90     8e90        0     1                 .L0 
+    8e94     8e94        0     1                 .L0 
+    8e94     8e94        0     1                 .L0 
+    8e9c     8e9c        0     1                 .L0 
+    8ea6     8ea6        0     1                 .L0 
+    8ea8     8ea8        0     1                 .L0 
+    8ea8     8ea8        0     1                 .L0 
+    8eb0     8eb0        0     1                 .L0 
+    8eb0     8eb0        0     1                 .L0 
     8eb2     8eb2        0     1                 .L0 
+    8eb4     8eb4        0     1                 .L0 
     8eb6     8eb6        0     1                 .L0 
-    8eb6     8eb6        0     1                 .L0 
-    8ec2     8ec2        0     1                 .L0 
-    8ec2     8ec2        0     1                 .L0 
+    8ebc     8ebc        0     1                 .L0 
+    8ebc     8ebc        0     1                 .L0 
+    8ebc     8ebc        0     1                 .L0 
+    8ec0     8ec0        0     1                 .L0 
     8ec4     8ec4        0     1                 .L0 
     8ec4     8ec4        0     1                 .L0 
     8ec8     8ec8        0     1                 .L0 
     8ec8     8ec8        0     1                 .L0 
     8eca     8eca        0     1                 .L0 
-    8eca     8eca        0     1                 .L0 
-    8ece     8ece        0     1                 .L0 
     8ece     8ece        0     1                 .L0 
     8ed0     8ed0        0     1                 .L0 
     8ed0     8ed0        0     1                 .L0 
-    8ed4     8ed4        0     1                 .L0 
-    8ed4     8ed4        0     1                 .L0 
-    8ed6     8ed6        0     1                 .L0 
-    8ed6     8ed6        0     1                 .L0 
-    8ede     8ede        0     1                 .L0 
+    8ed2     8ed2        0     1                 .L0 
+    8ed2     8ed2        0     1                 .L0 
+    8ed2     8ed2        0     1                 .L0 
     8ee2     8ee2        0     1                 .L0 
     8ee2     8ee2        0     1                 .L0 
-    8eee     8eee        0     1                 .L0 
-    8eee     8eee        0     1                 .L0 
-    8ef2     8ef2        0     1                 .L0 
-    8ef2     8ef2        0     1                 .L0 
-    8ef2     8ef2        0     1                 .L0 
-    8ef6     8ef6        0     1                 .L0 
-    8efa     8efa        0     1                 .L0 
-    8efa     8efa        0     1                 .L0 
-    8efe     8efe        0     1                 .L0 
-    8efe     8efe        0     1                 .L0 
-    8f00     8f00        0     1                 .L0 
-    8f04     8f04        0     1                 .L0 
-    8f06     8f06        0     1                 .L0 
-    8f06     8f06        0     1                 .L0 
-    8f08     8f08        0     1                 .L0 
-    8f08     8f08        0     1                 .L0 
-    8f08     8f08        0     1                 .L0 
-    8f10     8f10        0     1                 .L0 
-    8f10     8f10        0     1                 .L0 
-    8f18     8f18        0     1                 .L0 
-    8f18     8f18        0     1                 .L0 
-    8f1a     8f1a        0     1                 .L0 
-    8f1c     8f1c        0     1                 .L0 
-    8f24     8f24        0     1                 .L0 
-    8f28     8f28        0     1                 .L0 
-    8f28     8f28        0     1                 .L0 
-  100000   100000      23a     1 .rodata
+    8ee4     8ee4        0     1                 .L0 
+    8ee6     8ee6        0     1                 .L0 
+    8ee8     8ee8        0     1                 .L0 
+    8eea     8eea        0     1                 .L0 
+    8eea     8eea        0     1                 .L0 
+  100000   100000      21a     1 .rodata
   100000   100000        0     1         . = ALIGN(4)
   100000   100000      100     1         software_sol.o:(.rodata.sbox)
   100000   100000      100     1                 sbox
@@ -1606,29 +1588,29 @@
   10010a   10010a      100     1         software_sol.o:(.rodata.inv_sbox)
   10010a   10010a      100     1                 inv_sbox
   10010a   10010a        0     1                 $d
-  10020a   10020a       30     1         <internal>:(.rodata.cst16)
-  10023a   10023a        2     1 .shbss
-  10023a   10023a        2     1         . = ALIGN(4)
-  10023c   10023c        0     1 .data
-  10023c   10023c        0     1         . = ALIGN(4)
-  10023c   10023c        0     1         sdata = .
-  10023c   10023c        0     1         _sdata = .
-  10023c   10023c        0     1         edata = .
-  10023c   10023c        0     1         _edata = .
-  10023c   10023c        0     1 .bss
-  10023c   10023c        0     1         . = ALIGN(4)
-  10023c   10023c        0     1         _bss_start = .
-  10023c   10023c        0     1         _bss_end = .
+  10020a   10020a       10     1         <internal>:(.rodata.cst16)
+  10021a   10021a        2     1 .shbss
+  10021a   10021a        2     1         . = ALIGN(4)
+  10021c   10021c        0     1 .data
+  10021c   10021c        0     1         . = ALIGN(4)
+  10021c   10021c        0     1         sdata = .
+  10021c   10021c        0     1         _sdata = .
+  10021c   10021c        0     1         edata = .
+  10021c   10021c        0     1         _edata = .
+  10021c   10021c        0     1 .bss
+  10021c   10021c        0     1         . = ALIGN(4)
+  10021c   10021c        0     1         _bss_start = .
+  10021c   10021c        0     1         _bss_end = .
   104000   104000     4000     1 .stack
   104000   104000        0     1         . = ALIGN(4)
   104000   104000     4000     1         . = . + _min_stack 
   108000   108000        0     1         . = ALIGN(4)
   108000   108000        0     1         stack = . 
   108000   108000        0     1         _stack = . 
-  10023c   10023c        0     1 .bss
-  10023c   10023c        0     1         . = ALIGN(4)
-  10023c   10023c        0     1         _end = .
-       0        0      47b     1 .debug_abbrev
+  10021c   10021c        0     1 .bss
+  10021c   10021c        0     1         . = ALIGN(4)
+  10021c   10021c        0     1         _end = .
+       0        0      46c     1 .debug_abbrev
        0        0       31     1         include/exceptions.o:(.debug_abbrev)
        0        0        0     1                 $d
       31       31       31     1         include/int.o:(.debug_abbrev)
@@ -1637,12 +1619,12 @@
       62       62        0     1                 $d
      124      124       cf     1         include/utils.o:(.debug_abbrev)
      124      124        0     1                 $d
-     1f3      1f3      269     1         software_sol.o:(.debug_abbrev)
+     1f3      1f3      25a     1         software_sol.o:(.debug_abbrev)
      1f3      1f3        0     1                 $d
-     45c      45c       1f     1         crt0.riscv.o:(.debug_abbrev)
-     45c      45c        0     1                 .L0 
-     45c      45c        0     1                 $d
-       0        0     1218     1 .debug_info
+     44d      44d       1f     1         crt0.riscv.o:(.debug_abbrev)
+     44d      44d        0     1                 .L0 
+     44d      44d        0     1                 $d
+       0        0     121d     1 .debug_info
        0        0       49     1         include/exceptions.o:(.debug_info)
        0        0        0     1                 $d
       49       49       8b     1         include/int.o:(.debug_info)
@@ -1651,12 +1633,12 @@
       d4       d4        0     1                 $d
      29c      29c       a8     1         include/utils.o:(.debug_info)
      29c      29c        0     1                 $d
-     344      344      c3f     1         software_sol.o:(.debug_info)
+     344      344      c44     1         software_sol.o:(.debug_info)
      344      344        0     1                 $d
-     f83      f83      295     1         crt0.riscv.o:(.debug_info)
-     f83      f83        0     1                 .L0 
-     f83      f83        0     1                 $d
-       0        0      137     1 .debug_rnglists
+     f88      f88      295     1         crt0.riscv.o:(.debug_info)
+     f88      f88        0     1                 .L0 
+     f88      f88        0     1                 $d
+       0        0      123     1 .debug_rnglists
        0        0       1a     1         include/exceptions.o:(.debug_rnglists)
        0        0        0     1                 $d
        c        c        0     1                 .L0 
@@ -1669,12 +1651,12 @@
       69       69       1a     1         include/utils.o:(.debug_rnglists)
       69       69        0     1                 $d
       75       75        0     1                 .L0 
-      83       83       99     1         software_sol.o:(.debug_rnglists)
+      83       83       85     1         software_sol.o:(.debug_rnglists)
       83       83        0     1                 $d
       8f       8f        0     1                 .L0 
-     11c      11c       1b     1         crt0.riscv.o:(.debug_rnglists)
-     11c      11c        0     1                 $d
-     128      128        0     1                 .L0 
+     108      108       1b     1         crt0.riscv.o:(.debug_rnglists)
+     108      108        0     1                 $d
+     114      114        0     1                 .L0 
        0        0      1fc     1 .debug_str_offsets
        0        0       20     1         include/exceptions.o:(.debug_str_offsets)
        0        0        0     1                 $d
@@ -1693,7 +1675,7 @@
      120      120        0     1                 .L0 
        0        0      40f     1 .debug_str
        0        0      40f     1         <internal>:(.debug_str)
-       0        0      1b8     1 .debug_addr
+       0        0      1b4     1 .debug_addr
        0        0       14     1         include/exceptions.o:(.debug_addr)
        0        0        0     1                 $d
        8        8        0     1                 .L0 
@@ -1706,14 +1688,14 @@
       60       60       18     1         include/utils.o:(.debug_addr)
       60       60        0     1                 $d
       68       68        0     1                 .L0 
-      78       78      140     1         software_sol.o:(.debug_addr)
+      78       78      13c     1         software_sol.o:(.debug_addr)
       78       78        0     1                 $d
       80       80        0     1                 .L0 
        0        0       71     1 .comment
        0        0       71     1         <internal>:(.comment)
        0        0       60     1 .riscv.attributes
        0        0       60     1         <internal>:(.riscv.attributes)
-       0        0      3a8     4 .debug_frame
+       0        0      398     4 .debug_frame
        0        0       44     4         include/exceptions.o:(.debug_frame)
        0        0        0     1                 .L0 
        0        0        0     1                 $d
@@ -1726,10 +1708,10 @@
      16c      16c       4c     4         include/utils.o:(.debug_frame)
      16c      16c        0     1                 .L0 
      16c      16c        0     1                 $d
-     1b8      1b8      1f0     4         software_sol.o:(.debug_frame)
+     1b8      1b8      1e0     4         software_sol.o:(.debug_frame)
      1b8      1b8        0     1                 .L0 
      1b8      1b8        0     1                 $d
-       0        0     1e36     1 .debug_line
+       0        0     1dd6     1 .debug_line
        0        0       82     1         include/exceptions.o:(.debug_line)
        0        0        0     1                 .Lline_table_start0
        0        0        0     1                 $d
@@ -1742,22 +1724,22 @@
      3c9      3c9       c3     1         include/utils.o:(.debug_line)
      3c9      3c9        0     1                 .Lline_table_start0
      3c9      3c9        0     1                 $d
-     48c      48c     14ce     1         software_sol.o:(.debug_line)
+     48c      48c     146e     1         software_sol.o:(.debug_line)
      48c      48c        0     1                 .Lline_table_start0
      48c      48c        0     1                 $d
-    195a     195a      4dc     1         crt0.riscv.o:(.debug_line)
-    195a     195a        0     1                 .Lline_table_start0
-    195a     195a        0     1                 $d
+    18fa     18fa      4dc     1         crt0.riscv.o:(.debug_line)
+    18fa     18fa        0     1                 .Lline_table_start0
+    18fa     18fa        0     1                 $d
        0        0      141     1 .debug_line_str
        0        0      141     1         <internal>:(.debug_line_str)
-       0        0      a3c     1 .debug_loclists
+       0        0      a27     1 .debug_loclists
        0        0      115     1         include/tcutils.o:(.debug_loclists)
        0        0        0     1                 $d
        c        c        0     1                 .L0 
      115      115       1f     1         include/utils.o:(.debug_loclists)
      115      115        0     1                 $d
      121      121        0     1                 .L0 
-     134      134      908     1         software_sol.o:(.debug_loclists)
+     134      134      8f3     1         software_sol.o:(.debug_loclists)
      134      134        0     1                 $d
      140      140        0     1                 .L0 
        0        0       28     1 .debug_aranges

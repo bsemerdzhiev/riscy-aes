@@ -305,13 +305,14 @@ void write_v_to_address(uintptr_t addr, uint8_t vector[16]) {
 
 int main() {
   // Plaintext: "Hello, World!000" (16 bytes, 1 block)
-  uint8_t expected_output[16] = {'H', 'e', 'l', 'l', 'o', ',', ' ', 'W',
-                                 'o', 'r', 'l', 'd', '!', '0', '0', '0'};
+  uint8_t plaintext[16] = {'H', 'e', 'l', 'l', 'o', ',', ' ', 'W',
+                           'o', 'r', 'l', 'd', '!', '0', '0', '0'};
   // Key: "cese4040password" (16 bytes)
   uint8_t key[16] = {'c', 'e', 's', 'e', '4', '0', '4', '0',
                      'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
-  uint8_t plaintext[16] = {0x14, 0x09, 0xA5, 0xFB, 0x1F, 0xF4, 0x4B, 0x71,
-                           0xBE, 0xAA, 0x25, 0x2E, 0x0F, 0x08, 0xF9, 0xAA};
+  uint8_t expected_output[16] = {0x14, 0x09, 0xA5, 0xFB, 0x1F, 0xF4,
+                                 0x4B, 0x71, 0xBE, 0xAA, 0x25, 0x2E,
+                                 0x0F, 0x08, 0xF9, 0xAA};
 
   uint8_t ciphertext[16];
   size_t len = 16; // Single block
@@ -319,7 +320,7 @@ int main() {
   uintptr_t addr;
   uint32_t value;
 
-  aes128_ecb_decrypt(plaintext, len, key, ciphertext);
+  // aes128_ecb_encrypt(plaintext, len, key, ciphertext);
 
   addr = 0x0100000 + 0x2000 + 0x30;
   write_v_to_address(addr, expected_output);
