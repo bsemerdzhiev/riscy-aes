@@ -24,7 +24,7 @@ LLVM_CFLAGS += --sysroot=$(RISCV_GCC)/$(RISCV_ARCH)
 GCC_WARNS  = -Wall -Wextra -Wshadow -Wundef -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings
 
 # Define common files
-MAIN_SRC := main_decrypt2.c 
+MAIN_SRC := main_encrypt.c 
 MAIN_ASM := crt0.riscv.S
 # Define source files
 SOFT_SRC := $(wildcard $(SOFT_DIR)/*.c)

@@ -566,8 +566,6 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
       OPCODE_AES_LOAD: begin
         data_req        = 1'b1;  //issue memory read request through LSU
         rega_used_o     = 1'b1;  //use rs1 as base address operand
-        // regb_used_o     = 1'b1;  //use rs1 as base address operand
-        // regc_used_o     = 1'b1;
 
         data_type_o     = 2'b00; //load full 32-bit word (LW semantics)
          
@@ -580,8 +578,6 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
 
         imm_b_mux_sel_o    = IMMB_I;    // decode I-type immediate field [31:20]
         data_sign_extension_o = 2'b00;  // disable sign extension (word loads keep full 32 bits)
-
-        // regc_mux_o            = REGC_RD;
       end
 
       OPCODE_AES_STORE: begin

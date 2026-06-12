@@ -234,15 +234,6 @@ module cv32e40p_ex_stage
     aes_mem_we_wb_o    = 1'b0;   //////////////////////   AES enable writeback
 
 
-    // Here we change the standard to optionality for AES
-    /*
-    if (regfile_we_lsu) begin
-      regfile_we_wb_o = 1'b1;
-      if (apu_valid & (!apu_singlecycle & !apu_multicycle)) begin
-        wb_contention_lsu = 1'b1;
-      end
-      
-    */
     // LSU owns writeback
     if (regfile_we_lsu || aes_mem_we_lsu) begin
         regfile_we_wb_o = regfile_we_lsu;   

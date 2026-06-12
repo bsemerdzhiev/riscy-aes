@@ -9,7 +9,10 @@
 // specific language governing permissions and limitations under the License.
 
 ////////////////////////////////////////////////////////////////////////////////
-// Engineer:       Daniel Stefanov -                                          //
+// Engineer:       Daniel Stefanov                                            //
+//                 Borislav Semerdzhiev                                       //
+//                 Isidora Jovanovic                                          //
+//                 Nazar Vasyliev                                              //
 //                                                                            //
 // Additional contributions by:                                               //
 //                                                                            //
@@ -18,13 +21,9 @@
 //                                                                            //
 //                                                                            //
 //                                                                            //
-// Design Name:    Top level module                                           //
+// Design Name:    AES Memory                                                 //
 // Project Name:   RI5CY                                                      //
 // Language:       SystemVerilog                                              //
-//                                                                            //
-// Description:    Top level module of the RISC-V core.                       //
-//                 added APU, FPU parameter to include the APU_dispatcher     //
-//                 and the FPU                                                //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 

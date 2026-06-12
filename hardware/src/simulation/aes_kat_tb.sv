@@ -190,7 +190,9 @@ module tb_cv32e40p_aes_kat;
     imem[5] = enc_aes_load(5'd5, 5'd0, 12'd20);
     imem[6] = enc_aes_load(5'd6, 5'd0, 12'd24);
     imem[7] = enc_aes_load(5'd7, 5'd0, 12'd28);
+
     imem[8] = enc_nop();
+
     imem[9] = enc_aes_encrypt();
     imem[10] = enc_aes_store(5'd0, 5'd0, 12'd32); // ciphertext -> dmem[8..11]
     imem[11] = enc_aes_store(5'd1, 5'd0, 12'd36);
