@@ -31,6 +31,26 @@ static const uint8_t sbox[256] = {
 static const uint8_t rcon[10] = {0x01, 0x02, 0x04, 0x08, 0x10,
                                  0x20, 0x40, 0x80, 0x1b, 0x36};
 
+static const uint8_t inv_matrix[4][4] = {{0x0e, 0x0b, 0x0d, 0x09},
+                                         {0x09, 0x0e, 0x0b, 0x0d},
+                                         {0x0d, 0x09, 0x0e, 0x0b},
+                                         {0x0b, 0x0d, 0x09, 0x0e}};
+
+// GF(2^8) multiplication
+uint8_t gf_mult(uint8_t a, uint8_t b) {
+  uint8_t p = 0;
+  for (int i = 0; i < 8; i++) {
+    if (b & 1)
+      p ^= a;
+    uint8_t hi_bit = a & 0x80;
+    a <<= 1;
+    if (hi_bit)
+      a ^= 0x1b; // Reduce modulo 0x11b
+    b >>= 1;
+  }
+  return p;
+}
+
 // Key expansion function
 void expand_key(uint8_t *key, uint8_t *round_keys) {
   int i;
@@ -56,70 +76,69 @@ void expand_key(uint8_t *key, uint8_t *round_keys) {
     round_keys[i + 2] = round_keys[i - 14] ^ temp[2];
     round_keys[i + 3] = round_keys[i - 13] ^ temp[3];
   }
-}
 
-// SubBytes transformation
-void sub_bytes(uint8_t *state) {
-  for (int i = 0; i < 16; i++) {
-    state[i] = sbox[state[i]];
+  for (int32_t z = 16; z < 160; z += 16) {
+    uint8_t *keys = &round_keys[z];
+    for (int32_t col = 0; col < 4; col++) {
+      uint8_t c0 = keys[col * 4 + 0], c1 = keys[col * 4 + 1],
+              c2 = keys[col * 4 + 2], c3 = keys[col * 4 + 3];
+      for (int32_t row = 0; row < 4; row++) {
+        keys[col * 4 + row] =
+            gf_mult(inv_matrix[row][0], c0) ^ gf_mult(inv_matrix[row][1], c1) ^
+            gf_mult(inv_matrix[row][2], c2) ^ gf_mult(inv_matrix[row][3], c3);
+      }
+    }
   }
 }
 
-// ShiftRows transformation
-void shift_rows(uint8_t *state) {
-  uint8_t temp;
-  temp = state[1];
-  state[1] = state[5];
-  state[5] = state[9];
-  state[9] = state[13];
-  state[13] = temp;
-  temp = state[2];
-  state[2] = state[10];
-  state[10] = temp;
-  temp = state[6];
-  state[6] = state[14];
-  state[14] = temp;
-  temp = state[15];
-  state[15] = state[11];
-  state[11] = state[7];
-  state[7] = state[3];
-  state[3] = temp;
-}
-
-// GF(2^8) multiplication
-uint8_t gf_mult(uint8_t a, uint8_t b) {
-  uint8_t p = 0;
-  for (int i = 0; i < 8; i++) {
-    if (b & 1)
-      p ^= a;
-    uint8_t hi_bit = a & 0x80;
-    a <<= 1;
-    if (hi_bit)
-      a ^= 0x1b; // Reduce modulo 0x11b
-    b >>= 1;
-  }
-  return p;
-}
-
-// MixColumns transformation
-void mix_columns(uint8_t *state) {
-  uint8_t temp[16];
-  for (int i = 0; i < 4; i++) {
-    int idx = i * 4;
-    temp[idx] = gf_mult(0x02, state[idx]) ^ gf_mult(0x03, state[idx + 1]) ^
-                state[idx + 2] ^ state[idx + 3];
-    temp[idx + 1] = state[idx] ^ gf_mult(0x02, state[idx + 1]) ^
-                    gf_mult(0x03, state[idx + 2]) ^ state[idx + 3];
-    temp[idx + 2] = state[idx] ^ state[idx + 1] ^
-                    gf_mult(0x02, state[idx + 2]) ^
-                    gf_mult(0x03, state[idx + 3]);
-    temp[idx + 3] = gf_mult(0x03, state[idx]) ^ state[idx + 1] ^
-                    state[idx + 2] ^ gf_mult(0x02, state[idx + 3]);
-  }
-  for (int i = 0; i < 16; i++) {
-    state[i] = temp[i];
-  }
-}
+// // SubBytes transformation
+// void sub_bytes(uint8_t *state) {
+//   for (int i = 0; i < 16; i++) {
+//     state[i] = sbox[state[i]];
+//   }
+// }
+//
+// // ShiftRows transformation
+// void shift_rows(uint8_t *state) {
+//   uint8_t temp;
+//   temp = state[1];
+//   state[1] = state[5];
+//   state[5] = state[9];
+//   state[9] = state[13];
+//   state[13] = temp;
+//   temp = state[2];
+//   state[2] = state[10];
+//   state[10] = temp;
+//   temp = state[6];
+//   state[6] = state[14];
+//   state[14] = temp;
+//   temp = state[15];
+//   state[15] = state[11];
+//   state[11] = state[7];
+//   state[7] = state[3];
+//   state[3] = temp;
+// }
+//
+//
+// // MixColumns transformation
+// void mix_columns(uint8_t *state) {
+//   uint8_t temp[16];
+//   for (int i = 0; i < 4; i++) {
+//     int idx = i * 4;
+//     temp[idx] = gf_mult(0x02, state[idx]) ^ gf_mult(0x03, state[idx + 1]) ^
+//                 state[idx + 2] ^ state[idx + 3];
+//     temp[idx + 1] = state[idx] ^ gf_mult(0x02, state[idx + 1]) ^
+//                     gf_mult(0x03, state[idx + 2]) ^ state[idx + 3];
+//     temp[idx + 2] = state[idx] ^ state[idx + 1] ^
+//                     gf_mult(0x02, state[idx + 2]) ^
+//                     gf_mult(0x03, state[idx + 3]);
+//     temp[idx + 3] = gf_mult(0x03, state[idx]) ^ state[idx + 1] ^
+//                     state[idx + 2] ^ gf_mult(0x02, state[idx + 3]);
+//   }
+//   for (int i = 0; i < 16; i++) {
+//     state[i] = temp[i];
+//   }
+// }
 
 // AddRoundKey transformation
 void add_round_key(uint8_t *state, uint8_t *round_key) {
@@ -128,97 +147,72 @@ void add_round_key(uint8_t *state, uint8_t *round_key) {
   }
 }
 
-// // Single block AES-128 encryption
-// void aes128_encrypt_block(uint8_t *plaintext, uint8_t *round_keys, uint8_t
-// *ciphertext) {
-//     uint8_t state[16];
-//     memcpy(state, plaintext, 16);
-//
-//     // Initial round
-//     add_round_key(state, round_keys);
-//
-//     // Main rounds (1 to 9)
-//     for (int round = 1; round < 10; round++) {
-//         sub_bytes(state);
-//         shift_rows(state);
-//         mix_columns(state);
-//         add_round_key(state, &round_keys[round * 16]);
-//     }
-//
-//     // Final round (10)
-//     sub_bytes(state);
-//     shift_rows(state);
-//     add_round_key(state, &round_keys[10 * 16]);
-//
-//     memcpy(ciphertext, state, 16);
-// }
-//
-// Single block AES-128 encryption
-void aes128_encrypt_block(uint8_t *plaintext, uint8_t *round_keys,
+// Single block AES-128 decryption
+void aes128_decrypt_block(uint8_t *plaintext, uint8_t *round_keys,
                           uint8_t *ciphertext) {
   uint8_t state[16];
-  memcpy(state, plaintext, 16);
+  memcpy(state, ciphertext, 16);
 
   // Initial round
-  add_round_key(state, round_keys);
+  add_round_key(state, &round_keys[10 * 16]);
 
   // Main rounds (1 to 9):
   // https://riscvonomicon.github.io/book/extensions/zk/zkned/32bit.html#middle-round-implementation
-  for (int round = 1; round < 10; round++) {
+  for (int round = 9; round >= 1; round--) {
     uint32_t *state_ptr = (uint32_t *)state;
     uint32_t *round_key_ptr = (uint32_t *)&round_keys[round * 16];
     // aes32esmi rd rs1 rs2 bs
-    __asm__ volatile("aes32esmi %0, %1, %2, %3"
+    __asm__ volatile("aes32dsmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[0])
                      : "r"(round_key_ptr[0]), "r"(state_ptr[0]), "I"(0));
-    __asm__ volatile("aes32esmi %0, %1, %2, %3"
+    __asm__ volatile("aes32dsmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[0])
-                     : "r"(round_key_ptr[0]), "r"(state_ptr[1]), "I"(1));
-    __asm__ volatile("aes32esmi %0, %1, %2, %3"
+                     : "r"(round_key_ptr[0]), "r"(state_ptr[3]), "I"(1));
+    __asm__ volatile("aes32dsmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[0])
                      : "r"(round_key_ptr[0]), "r"(state_ptr[2]), "I"(2));
-    __asm__ volatile("aes32esmi %0, %1, %2, %3"
+    __asm__ volatile("aes32dsmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[0])
-                     : "r"(round_key_ptr[0]), "r"(state_ptr[3]), "I"(3));
+                     : "r"(round_key_ptr[0]), "r"(state_ptr[1]), "I"(3));
 
-    __asm__ volatile("aes32esmi %0, %1, %2, %3"
+    __asm__ volatile("aes32dsmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[1])
                      : "r"(round_key_ptr[1]), "r"(state_ptr[1]), "I"(0));
-    __asm__ volatile("aes32esmi %0, %1, %2, %3"
+    __asm__ volatile("aes32dsmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[1])
-                     : "r"(round_key_ptr[1]), "r"(state_ptr[2]), "I"(1));
-    __asm__ volatile("aes32esmi %0, %1, %2, %3"
+                     : "r"(round_key_ptr[1]), "r"(state_ptr[0]), "I"(1));
+    __asm__ volatile("aes32dsmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[1])
                      : "r"(round_key_ptr[1]), "r"(state_ptr[3]), "I"(2));
-    __asm__ volatile("aes32esmi %0, %1, %2, %3"
+    __asm__ volatile("aes32dsmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[1])
-                     : "r"(round_key_ptr[1]), "r"(state_ptr[0]), "I"(3));
+                     : "r"(round_key_ptr[1]), "r"(state_ptr[2]), "I"(3));
 
-    __asm__ volatile("aes32esmi %0, %1, %2, %3"
+    __asm__ volatile("aes32dsmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[2])
                      : "r"(round_key_ptr[2]), "r"(state_ptr[2]), "I"(0));
-    __asm__ volatile("aes32esmi %0, %1, %2, %3"
+    __asm__ volatile("aes32dsmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[2])
-                     : "r"(round_key_ptr[2]), "r"(state_ptr[3]), "I"(1));
-    __asm__ volatile("aes32esmi %0, %1, %2, %3"
+                     : "r"(round_key_ptr[2]), "r"(state_ptr[1]), "I"(1));
+    __asm__ volatile("aes32dsmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[2])
                      : "r"(round_key_ptr[2]), "r"(state_ptr[0]), "I"(2));
-    __asm__ volatile("aes32esmi %0, %1, %2, %3"
+    __asm__ volatile("aes32dsmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[2])
-                     : "r"(round_key_ptr[2]), "r"(state_ptr[1]), "I"(3));
+                     : "r"(round_key_ptr[2]), "r"(state_ptr[3]), "I"(3));
 
-    __asm__ volatile("aes32esmi %0, %1, %2, %3"
+    __asm__ volatile("aes32dsmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[3])
                      : "r"(round_key_ptr[3]), "r"(state_ptr[3]), "I"(0));
-    __asm__ volatile("aes32esmi %0, %1, %2, %3"
+    __asm__ volatile("aes32dsmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[3])
-                     : "r"(round_key_ptr[3]), "r"(state_ptr[0]), "I"(1));
-    __asm__ volatile("aes32esmi %0, %1, %2, %3"
+                     : "r"(round_key_ptr[3]), "r"(state_ptr[2]), "I"(1));
+    __asm__ volatile("aes32dsmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[3])
                      : "r"(round_key_ptr[3]), "r"(state_ptr[1]), "I"(2));
-    __asm__ volatile("aes32esmi %0, %1, %2, %3"
+    __asm__ volatile("aes32dsmi %0, %1, %2, %3"
                      : "+r"(round_key_ptr[3])
-                     : "r"(round_key_ptr[3]), "r"(state_ptr[2]), "I"(3));
+                     : "r"(round_key_ptr[3]), "r"(state_ptr[0]), "I"(3));
 
     state_ptr[0] = round_key_ptr[0]; // Copy the first 32 bits (4 bytes)
     state_ptr[1] = round_key_ptr[1]; // Copy the second 32 bits (4 bytes)
@@ -228,79 +222,82 @@ void aes128_encrypt_block(uint8_t *plaintext, uint8_t *round_keys,
 
   // Final round (10)
   uint32_t *final_state_ptr = (uint32_t *)state;
-  uint32_t *final_round_key_ptr = (uint32_t *)&round_keys[10 * 16];
+  uint32_t *final_round_key_ptr = (uint32_t *)&round_keys[0];
 
   // aes32esi rd, rs1, rs2, bs
-  __asm__ volatile("aes32esi %0, %1, %2, %3"
+  __asm__ volatile("aes32dsi %0, %1, %2, %3"
                    : "+r"(final_round_key_ptr[0])
                    : "r"(final_round_key_ptr[0]), "r"(final_state_ptr[0]),
                      "I"(0));
-  __asm__ volatile("aes32esi %0, %1, %2, %3"
+  __asm__ volatile("aes32dsi %0, %1, %2, %3"
                    : "+r"(final_round_key_ptr[0])
-                   : "r"(final_round_key_ptr[0]), "r"(final_state_ptr[1]),
+                   : "r"(final_round_key_ptr[0]), "r"(final_state_ptr[3]),
                      "I"(1));
-  __asm__ volatile("aes32esi %0, %1, %2, %3"
+  __asm__ volatile("aes32dsi %0, %1, %2, %3"
                    : "+r"(final_round_key_ptr[0])
                    : "r"(final_round_key_ptr[0]), "r"(final_state_ptr[2]),
                      "I"(2));
-  __asm__ volatile("aes32esi %0, %1, %2, %3"
+  __asm__ volatile("aes32dsi %0, %1, %2, %3"
                    : "+r"(final_round_key_ptr[0])
-                   : "r"(final_round_key_ptr[0]), "r"(final_state_ptr[3]),
+                   : "r"(final_round_key_ptr[0]), "r"(final_state_ptr[1]),
                      "I"(3));
-  __asm__ volatile("aes32esi %0, %1, %2, %3"
+
+  __asm__ volatile("aes32dsi %0, %1, %2, %3"
                    : "+r"(final_round_key_ptr[1])
                    : "r"(final_round_key_ptr[1]), "r"(final_state_ptr[1]),
                      "I"(0));
-  __asm__ volatile("aes32esi %0, %1, %2, %3"
+  __asm__ volatile("aes32dsi %0, %1, %2, %3"
                    : "+r"(final_round_key_ptr[1])
-                   : "r"(final_round_key_ptr[1]), "r"(final_state_ptr[2]),
+                   : "r"(final_round_key_ptr[1]), "r"(final_state_ptr[0]),
                      "I"(1));
-  __asm__ volatile("aes32esi %0, %1, %2, %3"
+  __asm__ volatile("aes32dsi %0, %1, %2, %3"
                    : "+r"(final_round_key_ptr[1])
                    : "r"(final_round_key_ptr[1]), "r"(final_state_ptr[3]),
                      "I"(2));
-  __asm__ volatile("aes32esi %0, %1, %2, %3"
+  __asm__ volatile("aes32dsi %0, %1, %2, %3"
                    : "+r"(final_round_key_ptr[1])
-                   : "r"(final_round_key_ptr[1]), "r"(final_state_ptr[0]),
+                   : "r"(final_round_key_ptr[1]), "r"(final_state_ptr[2]),
                      "I"(3));
-  __asm__ volatile("aes32esi %0, %1, %2, %3"
+
+  __asm__ volatile("aes32dsi %0, %1, %2, %3"
                    : "+r"(final_round_key_ptr[2])
                    : "r"(final_round_key_ptr[2]), "r"(final_state_ptr[2]),
                      "I"(0));
-  __asm__ volatile("aes32esi %0, %1, %2, %3"
+  __asm__ volatile("aes32dsi %0, %1, %2, %3"
                    : "+r"(final_round_key_ptr[2])
-                   : "r"(final_round_key_ptr[2]), "r"(final_state_ptr[3]),
+                   : "r"(final_round_key_ptr[2]), "r"(final_state_ptr[1]),
                      "I"(1));
-  __asm__ volatile("aes32esi %0, %1, %2, %3"
+  __asm__ volatile("aes32dsi %0, %1, %2, %3"
                    : "+r"(final_round_key_ptr[2])
                    : "r"(final_round_key_ptr[2]), "r"(final_state_ptr[0]),
                      "I"(2));
-  __asm__ volatile("aes32esi %0, %1, %2, %3"
+  __asm__ volatile("aes32dsi %0, %1, %2, %3"
                    : "+r"(final_round_key_ptr[2])
-                   : "r"(final_round_key_ptr[2]), "r"(final_state_ptr[1]),
+                   : "r"(final_round_key_ptr[2]), "r"(final_state_ptr[3]),
                      "I"(3));
-  __asm__ volatile("aes32esi %0, %1, %2, %3"
+
+  __asm__ volatile("aes32dsi %0, %1, %2, %3"
                    : "+r"(final_round_key_ptr[3])
                    : "r"(final_round_key_ptr[3]), "r"(final_state_ptr[3]),
                      "I"(0));
-  __asm__ volatile("aes32esi %0, %1, %2, %3"
+  __asm__ volatile("aes32dsi %0, %1, %2, %3"
                    : "+r"(final_round_key_ptr[3])
-                   : "r"(final_round_key_ptr[3]), "r"(final_state_ptr[0]),
+                   : "r"(final_round_key_ptr[3]), "r"(final_state_ptr[2]),
                      "I"(1));
-  __asm__ volatile("aes32esi %0, %1, %2, %3"
+  __asm__ volatile("aes32dsi %0, %1, %2, %3"
                    : "+r"(final_round_key_ptr[3])
                    : "r"(final_round_key_ptr[3]), "r"(final_state_ptr[1]),
                      "I"(2));
-  __asm__ volatile("aes32esi %0, %1, %2, %3"
+  __asm__ volatile("aes32dsi %0, %1, %2, %3"
                    : "+r"(final_round_key_ptr[3])
-                   : "r"(final_round_key_ptr[3]), "r"(final_state_ptr[2]),
+                   : "r"(final_round_key_ptr[3]), "r"(final_state_ptr[0]),
                      "I"(3));
 
-  memcpy(ciphertext, final_round_key_ptr, 16);
+  memcpy(plaintext, final_round_key_ptr, 16);
 }
 
 // AES-128 ECB encryption (no padding)
-void aes128_ecb_encrypt(uint8_t *plaintext, size_t len, uint8_t *key,
+void aes128_ecb_decrypt(uint8_t *plaintext, size_t len, uint8_t *key,
                         uint8_t *ciphertext) {
   if (len % 16 != 0) {
     // printf("Error: Input length must be a multiple of 16 bytes (no
@@ -316,7 +313,7 @@ void aes128_ecb_encrypt(uint8_t *plaintext, size_t len, uint8_t *key,
     for (size_t z = 0; z < 176; z++) {
       copy_key[z] = round_keys[z];
     }
-    aes128_encrypt_block(&plaintext[i], copy_key, &ciphertext[i]);
+    aes128_decrypt_block(&plaintext[i], copy_key, &ciphertext[i]);
   }
 }
 
@@ -338,27 +335,31 @@ void write_numb_to_address(uintptr_t addr, uint8_t vector[16]) {
 
 int main() {
   // Plaintext: "Hello, World!000" (16 bytes, 1 block)
-  uint8_t plaintext[16] = {'H', 'e', 'l', 'l', 'o', ',', ' ', 'W',
-                           'o', 'r', 'l', 'd', '!', '0', '0', '0'};
+  // uint8_t plaintext[16] = {'H', 'e', 'l', 'l', 'o', ',', ' ', 'W',
+  //                          'o', 'r', 'l', 'd', '!', '0', '0', '0'};
+  uint8_t ciphertext[16] = {0x14, 0x09, 0xA5, 0xFB, 0x1F, 0xF4, 0x4B, 0x71,
+                            0xBE, 0xAA, 0x25, 0x2E, 0x0F, 0x08, 0xF9, 0xAA};
+
   // Key: "cese4040password" (16 bytes)
   uint8_t key[16] = {'c', 'e', 's', 'e', '4', '0', '4', '0',
                      'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
-  uint8_t expected_output[16] = {0x14, 0x09, 0xA5, 0xFB, 0x1F, 0xF4,
-                                 0x4B, 0x71, 0xBE, 0xAA, 0x25, 0x2E,
-                                 0x0F, 0x08, 0xF9, 0xAA};
-  uint8_t ciphertext[16];
+
+  uint8_t expected_output[16] = {'H', 'e', 'l', 'l', 'o', ',', ' ', 'W',
+                                 'o', 'r', 'l', 'd', '!', '0', '0', '0'};
+
+  uint8_t plaintext[16];
   size_t len = 16; // Single block
 
   uintptr_t addr;
   uint32_t value;
 
-  aes128_ecb_encrypt(plaintext, len, key, ciphertext);
+  aes128_ecb_decrypt(plaintext, len, key, ciphertext);
 
   addr = 0x0100000 + 0x2000 + 0x30;
   write_v_to_address(addr, expected_output);
 
   addr = 0x0100000 + 0x2000 + 0x40;
-  write_v_to_address(addr, ciphertext);
+  write_v_to_address(addr, plaintext);
 
   addr = 0x0100000 + 0x2000 + 0x50;
 
@@ -366,10 +367,10 @@ int main() {
   // uint32_t *aes32esmi_ptr = (uint32_t *)res_from_aes32esmi;
 
   // uint32_t chosen_byte = 0;
-  //
+
   // aes32esmi_ptr[0] = 0xe7aeaa00;
   // chosen_byte = 0xa8c81b9f;
-  //
+
   // __asm__ volatile("aes32esmi %0, %1, %2, %3"
   //                  : "+r"(aes32esmi_ptr[0])
   //                  : "r"(aes32esmi_ptr[0]), "r"(chosen_byte), "I"(1));
@@ -381,7 +382,7 @@ int main() {
          0x04;        // Some memory-mapped register or memory location
   value = 0xCAFEBABE; // Assume arrays match initially
   for (int i = 0; i < 16; i++) {
-    if (ciphertext[i] != expected_output[i]) {
+    if (plaintext[i] != expected_output[i]) {
       value = 0xBAAAAAAD; // Set to false value if there's a mismatch
       break;
     }

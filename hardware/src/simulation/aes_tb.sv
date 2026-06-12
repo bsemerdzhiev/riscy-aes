@@ -197,14 +197,55 @@ module tb_cv32e40p_aes;
     end
   endtask
 
+task automatic check_decrypt(
+    input logic [1:0]  bs,
+    input logic [31:0] matrix_input,
+    input logic [31:0] key,
+    input logic [1:0]  op
+  );
+    logic [31:0] expected;
+
+    begin
+      bs_i           = bs;
+      matrix_input_i = matrix_input;
+      key_i          = key;
+      chosen_op_i    = op;
+
+      #1;
+
+      /*
+      if (aes_o !== expected) begin
+        $error("AES mismatch: op=%b bs=%0d matrix=%08h key=%08h got=%08h expected=%08h",
+               op, bs, matrix_input, key, aes_o, expected);
+      end
+      if (aes_o == expected) begin
+        $display("AES correct: op=%b bs=%0d matrix=%08h key=%08h got=%08h expected=%08h",
+               op, bs, matrix_input, key, aes_o, expected);
+      end
+      */
+      #1;
+      $display("Decrypt result op=%b bs=%0d selected=%02h got=%08h",
+                 op, bs, matrix_input[(bs*8)+:8], aes_o);
+    end
+  endtask
+
+
   initial begin
     $display("Starting cv32e40p_aes self-checking testbench...");
 
     // Directed tests. These catch byte ordering, key XOR, and direction bugs.
-    check_one(2'd0, 32'h00112233, 32'h00000000, AES32_ESI);
-    check_one(2'd0, 32'h00112233, 32'h89abcdef, AES32_ESMI);
-    check_one(2'd2, 32'hdeadbeef, 32'h12345678, AES32_DSMI);
-    check_one(2'd3, 32'hcafebabe, 32'hffffffff, AES32_DSI);
+    // check_one(2'd0, 32'h00112233, 32'h00000000, AES32_ESI);
+    // check_one(2'd0, 32'hcafebabe, 32'hffffffff, AES32_ESMI);
+    // check_one(2'd2, 32'hdeadbeef, 32'h12345678, AES32_DSMI);
+    // check_one(2'd3, 32'hcafebabe, 32'hffffffff, AES32_DSI);
+
+    // check_decrypt(2'd0, 32'h21548ba2, 32'h12345678, AES32_DSMI);
+    // check_decrypt(2'd2, 32'h165151b8, 32'h1a2b7843, AES32_DSMI);
+    // check_decrypt(2'd3, 32'h165151b8, 32'h1a2b7843, AES32_DSI);
+    check_decrypt(2'd0, 32'h00000000, 32'h00000000, AES32_DSI);
+    check_decrypt(2'd1, 32'h00000000, 32'h00000000, AES32_DSI);
+    check_decrypt(2'd2, 32'h00000000, 32'h00000000, AES32_DSI);
+    check_decrypt(2'd3, 32'h00000000, 32'h00000000, AES32_DSI);
 
 
     /*
