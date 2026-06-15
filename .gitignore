@@ -1,4 +1,5 @@
 vivado
+software/loop_unroll/build/*
 *.str
 *.jou
 *.log

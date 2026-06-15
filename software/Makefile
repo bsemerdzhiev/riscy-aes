@@ -20,11 +20,13 @@ LLVM_CFLAGS += $(CONF_CFLAGS)
 LLVM_CFLAGS += -msmall-data-limit=8  -std=gnu11 -nostartfiles -ffunction-sections -fdata-sections -g3 -o0
 LLVM_CFLAGS += --sysroot=$(RISCV_GCC)/$(RISCV_ARCH)
 
+PASS_PLUGIN := ./loop_unroll/build/libloop_unroll.so
+OPT         := opt-20
 
 GCC_WARNS  = -Wall -Wextra -Wshadow -Wundef -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings
 
 # Define common files
-MAIN_SRC := software_sol.c 
+MAIN_SRC := main.c 
 MAIN_ASM := crt0.riscv.S
 # Define source files
 SOFT_SRC := $(wildcard $(SOFT_DIR)/*.c)
@@ -35,7 +37,9 @@ PYTHON_FLAGS_CODE = -b 0x8000 -s 0x8000 -f
 PYTHON_FLAGS_DATA = -b 0x100000 -s 0x8000 -f
 
 # Define object files
+#SOFT_OBJS := $(patsubst %.c,%.o,$(SOFT_SRC)) $(patsubst %.c,%.o,$(INCLUDE_SRC)) main.o
 SOFT_OBJS := $(patsubst %.c,%.o,$(SOFT_SRC)) $(patsubst %.c,%.o,$(INCLUDE_SRC)) $(patsubst %.c,%.o,$(MAIN_SRC))
+
 ACC_OBJS  := $(patsubst %.S,%.o,$(ACC_SRC)) $(patsubst %.c,%.o,$(INCLUDE_SRC)) $(patsubst %.c,%.o,$(MAIN_SRC)) 
 SREC_OBJS := $(OUTPUT_DIR)/soft.srec $(OUTPUT_DIR)/acc.srec
 ELF_OBJS := $(OUTPUT_DIR)/soft.elf $(OUTPUT_DIR)/acc.elf
@@ -55,6 +59,15 @@ all: soft
 crt0.riscv.o: crt0.riscv.S
 	$(LLVMCC) $(LLVM_CFLAGS) -c -x assembler-with-cpp -o $@ $<
 
+main.ll: $(MAIN_SRC)
+	$(LLVMCC) $(LLVM_CFLAGS) -emit-llvm -S -o $@ $<
+
+main_unrolled.ll: main.ll $(PASS_PLUGIN)
+	$(OPT) -load-pass-plugin $(PASS_PLUGIN) --passes="aes-loop-unroll" $< -S -o $@
+
+main.o: main.ll
+	$(LLVMCC) $(LLVM_CFLAGS) -c -x ir -o $@ $<
+
 # Compile object files
 %.o: %.c
 	$(LLVMCC) $(LLVM_CFLAGS) -c -o $@ $<
@@ -67,5 +80,6 @@ soft: $(SOFT_OBJS) crt0.riscv.o
 
 # Clean rule
 clean:
-	rm -f -r crt0.riscv.o aes.map $(SOFT_OBJS) $(ACC_OBJS) $(OUTPUT_DIR)
+	rm -f -r crt0.riscv.o aes.map $(SOFT_OBJS) $(ACC_OBJS) $(OUTPUT_DIR) \
+		main.ll main_unrolled.ll
 
