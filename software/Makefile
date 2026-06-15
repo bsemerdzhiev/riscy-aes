@@ -26,7 +26,7 @@ OPT         := opt-20
 GCC_WARNS  = -Wall -Wextra -Wshadow -Wundef -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings
 
 # Define common files
-MAIN_SRC := main.c 
+MAIN_SRC := main_d.c 
 MAIN_ASM := crt0.riscv.S
 # Define source files
 SOFT_SRC := $(wildcard $(SOFT_DIR)/*.c)
@@ -38,7 +38,21 @@ PYTHON_FLAGS_DATA = -b 0x100000 -s 0x8000 -f
 
 # Define object files
 #SOFT_OBJS := $(patsubst %.c,%.o,$(SOFT_SRC)) $(patsubst %.c,%.o,$(INCLUDE_SRC)) main.o
+
+ifdef LOOP_UNROLL
+SOFT_OBJS := $(patsubst %.c,%.o,$(SOFT_SRC)) $(patsubst %.c,%.o,$(INCLUDE_SRC)) main.o
+
+main.ll: $(MAIN_SRC)
+	$(LLVMCC) $(LLVM_CFLAGS) -emit-llvm -S -o $@ $<
+
+main_unrolled.ll: main.ll $(PASS_PLUGIN)
+	$(OPT) -load-pass-plugin $(PASS_PLUGIN) --passes="aes-loop-unroll" $< -S -o $@
+
+main.o: main_unrolled.ll
+	$(LLVMCC) $(LLVM_CFLAGS) -c -x ir -o $@ $<
+else
 SOFT_OBJS := $(patsubst %.c,%.o,$(SOFT_SRC)) $(patsubst %.c,%.o,$(INCLUDE_SRC)) $(patsubst %.c,%.o,$(MAIN_SRC))
+endif
 
 ACC_OBJS  := $(patsubst %.S,%.o,$(ACC_SRC)) $(patsubst %.c,%.o,$(INCLUDE_SRC)) $(patsubst %.c,%.o,$(MAIN_SRC)) 
 SREC_OBJS := $(OUTPUT_DIR)/soft.srec $(OUTPUT_DIR)/acc.srec
@@ -58,15 +72,6 @@ all: soft
 # Compile crt0 startup file
 crt0.riscv.o: crt0.riscv.S
 	$(LLVMCC) $(LLVM_CFLAGS) -c -x assembler-with-cpp -o $@ $<
-
-main.ll: $(MAIN_SRC)
-	$(LLVMCC) $(LLVM_CFLAGS) -emit-llvm -S -o $@ $<
-
-main_unrolled.ll: main.ll $(PASS_PLUGIN)
-	$(OPT) -load-pass-plugin $(PASS_PLUGIN) --passes="aes-loop-unroll" $< -S -o $@
-
-main.o: main.ll
-	$(LLVMCC) $(LLVM_CFLAGS) -c -x ir -o $@ $<
 
 # Compile object files
 %.o: %.c
