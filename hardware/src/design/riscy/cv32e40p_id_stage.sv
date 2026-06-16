@@ -110,6 +110,8 @@ module cv32e40p_id_stage
     output logic       aes_mem_we_ex_o,
     output logic       aes_enc_en_o,
     output logic       aes_dec_en_o,
+    output logic       aes_enc_old_en_o,
+    output logic       aes_dec_old_en_o,
 
     output logic  [2:0]      aes_ws_id_o,
     input logic   [31:0]     aes_id_data_i,    
@@ -409,6 +411,8 @@ module cv32e40p_id_stage
 
   logic aes_enc_en;
   logic aes_dec_en;
+  logic aes_enc_old_en;
+  logic aes_dec_old_en;
   logic aes_store_en;
 
   // Data Memory Control
@@ -1058,6 +1062,8 @@ module cv32e40p_id_stage
       .aes_mem_we_o           (aes_mem_we_id),
       .aes_enc_en_o           (aes_enc_en),
       .aes_dec_en_o           (aes_dec_en),
+      .aes_enc_old_en_o       (aes_enc_old_en),
+      .aes_dec_old_en_o       (aes_dec_old_en),
       .aes_store_en_o         (aes_store_en),
 
 
@@ -1499,6 +1505,8 @@ module cv32e40p_id_stage
       aes_mem_we_ex_o        <= 1'b0;
       aes_enc_en_o           <= 1'b0;
       aes_dec_en_o           <= 1'b0;
+      aes_enc_old_en_o       <= 1'b0;
+      aes_dec_old_en_o       <= 1'b0;
 
     end else if (data_misaligned_i) begin
       // misaligned data access case
@@ -1581,9 +1589,11 @@ module cv32e40p_id_stage
         end
         
         ///////////////////////////////////////////////////////////////
-        aes_mem_we_ex_o <= aes_mem_we_id;
-        aes_enc_en_o    <= aes_enc_en;
-        aes_dec_en_o    <= aes_dec_en;
+        aes_mem_we_ex_o  <= aes_mem_we_id;
+        aes_enc_en_o     <= aes_enc_en;
+        aes_dec_en_o     <= aes_dec_en;
+        aes_enc_old_en_o <= aes_enc_old_en;
+        aes_dec_old_en_o <= aes_dec_old_en;
 
         if (aes_mem_we_id) begin
           regfile_waddr_ex_o <= regfile_waddr_id;
@@ -1651,6 +1661,8 @@ module cv32e40p_id_stage
 
         aes_enc_en_o         <= 1'b0;
         aes_dec_en_o         <= 1'b0;
+        aes_enc_old_en_o     <= 1'b0;
+        aes_dec_old_en_o     <= 1'b0;
 
       end else if (csr_access_ex_o) begin
         //In the EX stage there was a CSR access, to avoid multiple

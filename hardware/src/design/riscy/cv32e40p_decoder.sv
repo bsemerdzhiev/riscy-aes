@@ -121,6 +121,8 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   output logic        aes_mem_we_o,
   output logic        aes_enc_en_o,
   output logic        aes_dec_en_o,
+  output logic        aes_enc_old_en_o,
+  output logic        aes_dec_old_en_o,
   output logic        aes_store_en_o,
 
   // CSR manipulation
@@ -164,6 +166,8 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   logic       aes_mem_we;
   logic       aes_enc_en;
   logic       aes_dec_en;
+  logic       aes_enc_old_en;
+  logic       aes_dec_old_en;
   logic       aes_store_en;
 
   logic       regfile_alu_we;
@@ -239,6 +243,8 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
     aes_mem_we                  = 1'b0;
     aes_enc_en                  = 1'b0;
     aes_dec_en                  = 1'b0;
+    aes_enc_old_en              = 1'b0;
+    aes_dec_old_en              = 1'b0;
     aes_store_en                = 1'b0;
 
     regfile_mem_we              = 1'b0;
@@ -599,8 +605,10 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
 
       OPCODE_AES_ENCRYPT: begin
         unique case (instr_rdata_i[14:12])
-          3'b000: aes_enc_en = 1'b1;
-          3'b001: aes_dec_en = 1'b1;
+          3'b000: aes_enc_en     = 1'b1;
+          3'b001: aes_dec_en     = 1'b1;
+          3'b010: aes_enc_old_en = 1'b1;
+          3'b011: aes_dec_old_en = 1'b1;
           default: ;
         endcase
       end
@@ -3073,6 +3081,8 @@ module cv32e40p_decoder import cv32e40p_pkg::*; import cv32e40p_apu_core_pkg::*;
   assign aes_mem_we_o                = (deassert_we_i) ? 1'b0          : aes_mem_we;
   assign aes_enc_en_o                = (deassert_we_i) ? 1'b0          : aes_enc_en;
   assign aes_dec_en_o                = (deassert_we_i) ? 1'b0          : aes_dec_en;
+  assign aes_enc_old_en_o            = (deassert_we_i) ? 1'b0          : aes_enc_old_en;
+  assign aes_dec_old_en_o            = (deassert_we_i) ? 1'b0          : aes_dec_old_en;
   assign aes_store_en_o              = (deassert_we_i) ? 1'b0          : aes_store_en;
 
 endmodule // cv32e40p_decoder

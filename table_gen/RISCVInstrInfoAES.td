@@ -53,4 +53,26 @@ def AES_DECRYPT : RVInst<(outs), (ins),
   let Inst{6-0}  = 0x6b;
 }
 
+// R-type: AES_ENCRYPT_OLD  (old separate encrypt module, funct3=010)
+let hasSideEffects = 1, mayLoad = 0, mayStore = 0 in
+def AES_ENCRYPT_OLD : RVInst<(outs), (ins),
+                              "aes.encrypt.old", "",
+                              [], InstFormatR> {
+  let Inst{31-15} = 0;
+  let Inst{14-12}  = 0b010;
+  let Inst{11-7} = 0;
+  let Inst{6-0}  = 0x6b;
+}
+
+// R-type: AES_DECRYPT_OLD  (old separate decrypt module, funct3=011)
+let hasSideEffects = 1, mayLoad = 0, mayStore = 0 in
+def AES_DECRYPT_OLD : RVInst<(outs), (ins),
+                              "aes.decrypt.old", "",
+                              [], InstFormatR> {
+  let Inst{31-15} = 0;
+  let Inst{14-12}  = 0b011;
+  let Inst{11-7} = 0;
+  let Inst{6-0}  = 0x6b;
+}
+
 }

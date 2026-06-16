@@ -246,6 +246,8 @@ module cv32e40p_core
   //                                         used for encrypt/decrypt
   logic                                     aes_enc_en_ex;
   logic                                     aes_dec_en_ex;
+  logic                                     aes_enc_old_en_ex;
+  logic                                     aes_dec_old_en_ex;
 
   //                                         used for store
   logic                         [2:0]       aes_ws_ex;
@@ -625,8 +627,10 @@ module cv32e40p_core
 
       ////////////////////////////////////////////
       .aes_mem_we_ex_o   (aes_mem_we_ex),
-      .aes_enc_en_o (aes_enc_en_ex),
-      .aes_dec_en_o (aes_dec_en_ex),
+      .aes_enc_en_o      (aes_enc_en_ex),
+      .aes_dec_en_o      (aes_dec_en_ex),
+      .aes_enc_old_en_o  (aes_enc_old_en_ex),
+      .aes_dec_old_en_o  (aes_dec_old_en_ex),
 
       .aes_ws_id_o          (aes_ws_id),
       .aes_id_data_i        (aes_id_data),
@@ -882,8 +886,10 @@ module cv32e40p_core
       .aes_mem_we_i    (aes_mem_we_ex),
       .aes_mem_we_wb_o (aes_mem_we_wb),
 
-      .aes_enc_en_i    (aes_enc_en_ex),
-      .aes_dec_en_i    (aes_dec_en_ex),
+      .aes_enc_en_i        (aes_enc_en_ex),
+      .aes_dec_en_i        (aes_dec_en_ex),
+      .aes_enc_old_en_i    (aes_enc_old_en_ex),
+      .aes_dec_old_en_i    (aes_dec_old_en_ex),
 
       .aes_state_i     (aes_state),
       .aes_key_i       (aes_key),

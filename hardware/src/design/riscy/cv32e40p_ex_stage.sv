@@ -145,6 +145,8 @@ module cv32e40p_ex_stage
 
     input  logic aes_enc_en_i,
     input  logic aes_dec_en_i,
+    input  logic aes_enc_old_en_i,
+    input  logic aes_dec_old_en_i,
 
     input  logic [127:0] aes_state_i,
     input  logic [127:0] aes_key_i,
@@ -185,6 +187,13 @@ module cv32e40p_ex_stage
   logic        aes_ready;
 
   logic        aes_flush;
+
+  // old separate enc/dec units
+  logic        aes_enc_old_ready, aes_dec_old_ready;
+  logic        aes_enc_old_flush, aes_dec_old_flush;
+  logic [127:0] aes_enc_old_result, aes_dec_old_result;
+  logic [127:0] aes_merged_result;
+  logic [1:0]  aes_mode_q;
 
   // APU signals
   logic        apu_valid;
@@ -296,6 +305,8 @@ module cv32e40p_ex_stage
   );
 
 
+  logic aes_merged_ready, aes_merged_flush;
+
   cv32e40p_aes32 aes_unit_i(
       .clk_i          (clk),
       .rst_ni         (rst_n),
@@ -306,10 +317,47 @@ module cv32e40p_ex_stage
       .data_i         (aes_state_i),
       .round_key_i    (aes_key_i),
 
-      .ready_o        (aes_ready),
-      .result_o       (aes_state_o),
-      .aes_flush_en_o (aes_flush)
+      .ready_o        (aes_merged_ready),
+      .result_o       (aes_merged_result),
+      .aes_flush_en_o (aes_merged_flush)
   );
+
+  cv32e40p_aes32_encrypt enc_old_i(
+      .clk_i          (clk),
+      .rst_ni         (rst_n),
+      .enable_i       (aes_enc_old_en_i),
+      .ex_ready_i     (ex_ready_o),
+      .plaintext_i    (aes_state_i),
+      .round_key_i    (aes_key_i),
+      .ready_o        (aes_enc_old_ready),
+      .ciphertext_o   (aes_enc_old_result),
+      .aes_flush_en_o (aes_enc_old_flush)
+  );
+
+  cv32e40p_aes32_decrypt dec_old_i(
+      .clk_i          (clk),
+      .rst_ni         (rst_n),
+      .enable_i       (aes_dec_old_en_i),
+      .ciphertext_i   (aes_state_i),
+      .round_key_i    (aes_key_i),
+      .ready_o        (aes_dec_old_ready),
+      .plaintext_o    (aes_dec_old_result),
+      .aes_flush_en_o (aes_dec_old_flush)
+  );
+
+  // track which unit was last started to mux the result
+  always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n)                                  aes_mode_q <= 2'b00;
+    else if (aes_enc_en_i | aes_dec_en_i)        aes_mode_q <= 2'b00;
+    else if (aes_enc_old_en_i)                   aes_mode_q <= 2'b01;
+    else if (aes_dec_old_en_i)                   aes_mode_q <= 2'b10;
+  end
+
+  assign aes_ready   = aes_merged_ready & aes_enc_old_ready & aes_dec_old_ready;
+  assign aes_flush   = aes_merged_flush | aes_enc_old_flush | aes_dec_old_flush;
+  assign aes_state_o = (aes_mode_q == 2'b01) ? aes_enc_old_result :
+                       (aes_mode_q == 2'b10) ? aes_dec_old_result :
+                                               aes_merged_result;
 
   ////////////////////////////////////////////////////////////////
   //  __  __ _   _ _   _____ ___ ____  _     ___ _____ ____     //
@@ -471,7 +519,7 @@ module cv32e40p_ex_stage
   // depend on ex_ready.
   assign ex_ready_o = (~apu_stall & alu_ready & aes_ready & mult_ready & lsu_ready_ex_i
                        & wb_ready_i & ~wb_contention) | (branch_in_ex_i);
-  assign ex_valid_o = (apu_valid | alu_en_i | aes_enc_en_i | aes_dec_en_i | aes_mem_we_i | mult_en_i | csr_access_i | lsu_en_i)
+  assign ex_valid_o = (apu_valid | alu_en_i | aes_enc_en_i | aes_dec_en_i | aes_enc_old_en_i | aes_dec_old_en_i | aes_mem_we_i | mult_en_i | csr_access_i | lsu_en_i)
                        & (alu_ready & mult_ready & lsu_ready_ex_i & wb_ready_i);
 
 endmodule

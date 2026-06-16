@@ -118,12 +118,19 @@ module tb_cv32e40p_aes_load;
 
   endfunction
   function automatic logic [31:0] enc_aes_encrypt();
-    // funct7[31:25], rs2[24:20], rs1[19:15], funct3=000, rd=0, opcode=0x6b
     enc_aes_encrypt = {7'h0, 5'h0, 5'h0, 3'b000, 5'h0, 7'h6b};
   endfunction
 
   function automatic logic [31:0] enc_aes_decrypt();
     enc_aes_decrypt = {7'h0, 5'h0, 5'h0, 3'b001, 5'h0, 7'h6b};
+  endfunction
+
+  function automatic logic [31:0] enc_aes_encrypt_old();
+    enc_aes_encrypt_old = {7'h0, 5'h0, 5'h0, 3'b010, 5'h0, 7'h6b};
+  endfunction
+
+  function automatic logic [31:0] enc_aes_decrypt_old();
+    enc_aes_decrypt_old = {7'h0, 5'h0, 5'h0, 3'b011, 5'h0, 7'h6b};
   endfunction
 
   function automatic logic [31:0] enc_aes_store(
@@ -279,6 +286,24 @@ module tb_cv32e40p_aes_load;
     imem[18] = enc_aes_store(5'd2, 5'd0, 12'd56);
     imem[19] = enc_aes_store(5'd3, 5'd0, 12'd60);
 
+    // Phase 3: enc_old (funct3=010) round-trip - reload plaintext, encrypt, store
+    imem[20] = enc_aes_load(5'd0, 5'd0, 12'd0);
+    imem[21] = enc_aes_load(5'd1, 5'd0, 12'd4);
+    imem[22] = enc_aes_load(5'd2, 5'd0, 12'd8);
+    imem[23] = enc_aes_load(5'd3, 5'd0, 12'd12);
+    imem[24] = enc_nop();
+    imem[25] = enc_aes_encrypt_old();
+    imem[26] = enc_aes_store(5'd0, 5'd0, 12'd64);  // dmem[16..19]
+    imem[27] = enc_aes_store(5'd1, 5'd0, 12'd68);
+    imem[28] = enc_aes_store(5'd2, 5'd0, 12'd72);
+    imem[29] = enc_aes_store(5'd3, 5'd0, 12'd76);
+    imem[30] = enc_nop();
+    imem[31] = enc_aes_decrypt_old();              // decrypt what enc_old produced
+    imem[32] = enc_aes_store(5'd0, 5'd0, 12'd80);  // dmem[20..23]
+    imem[33] = enc_aes_store(5'd1, 5'd0, 12'd84);
+    imem[34] = enc_aes_store(5'd2, 5'd0, 12'd88);
+    imem[35] = enc_aes_store(5'd3, 5'd0, 12'd92);
+
     rst_n = 1'b0;
     fetch_enable = 1'b0;
 
@@ -287,17 +312,26 @@ module tb_cv32e40p_aes_load;
     rst_n = 1'b1;
     fetch_enable = 1'b1;
 
-    repeat (600) @(posedge clk);
+    repeat (1400) @(posedge clk);
 
-    $display("ORIGINAL PLAINTEXT: %08h %08h %08h %08h", dmem[0], dmem[1], dmem[2], dmem[3]);
-    $display("CIPHERTEXT: %08h %08h %08h %08h", dmem[8], dmem[9], dmem[10], dmem[11]);
-    $display("RECOVERED: %08h %08h %08h %08h", dmem[12], dmem[13], dmem[14], dmem[15]);
+    $display("ORIGINAL PLAINTEXT:  %08h %08h %08h %08h", dmem[0],  dmem[1],  dmem[2],  dmem[3]);
+    $display("MERGED CIPHERTEXT:   %08h %08h %08h %08h", dmem[8],  dmem[9],  dmem[10], dmem[11]);
+    $display("MERGED RECOVERED:    %08h %08h %08h %08h", dmem[12], dmem[13], dmem[14], dmem[15]);
+    $display("OLD CIPHERTEXT:      %08h %08h %08h %08h", dmem[16], dmem[17], dmem[18], dmem[19]);
+    $display("OLD RECOVERED:       %08h %08h %08h %08h", dmem[20], dmem[21], dmem[22], dmem[23]);
 
     if (dmem[12] === dmem[0] && dmem[13] === dmem[1] &&
         dmem[14] === dmem[2] && dmem[15] === dmem[3]) begin
-      $display("DECRYPT ROUND-TRIP TEST PASSED");
+      $display("MERGED MODULE ROUND-TRIP TEST PASSED");
     end else begin
-      $error("DECRYPT ROUND-TRIP TEST FAILED: recovered != original plaintext");
+      $error("MERGED MODULE ROUND-TRIP TEST FAILED");
+    end
+
+    if (dmem[20] === dmem[0] && dmem[21] === dmem[1] &&
+        dmem[22] === dmem[2] && dmem[23] === dmem[3]) begin
+      $display("OLD MODULE ROUND-TRIP TEST PASSED");
+    end else begin
+      $error("OLD MODULE ROUND-TRIP TEST FAILED");
     end
 
     $finish;

@@ -102,6 +102,14 @@ module tb_cv32e40p_aes_kat;
     enc_aes_decrypt = {17'd0, 3'b001, 5'd0, 7'h6b}; // funct3=001
   endfunction
 
+  function automatic logic [31:0] enc_aes_encrypt_old();
+    enc_aes_encrypt_old = {17'd0, 3'b010, 5'd0, 7'h6b}; // funct3=010
+  endfunction
+
+  function automatic logic [31:0] enc_aes_decrypt_old();
+    enc_aes_decrypt_old = {17'd0, 3'b011, 5'd0, 7'h6b}; // funct3=011
+  endfunction
+
   function automatic logic [31:0] enc_nop();
     enc_nop = 32'h0000_0013; // addi x0, x0, 0
   endfunction
@@ -217,17 +225,45 @@ module tb_cv32e40p_aes_kat;
     imem[28] = enc_aes_store(5'd3, 5'd0, 12'd60);
     imem[29] = enc_nop();
 
+    // Phase 3: KAT encrypt with old separate module (funct3=010)
+    imem[30] = enc_aes_load(5'd0, 5'd0, 12'd0);   // reload plaintext
+    imem[31] = enc_aes_load(5'd1, 5'd0, 12'd4);
+    imem[32] = enc_aes_load(5'd2, 5'd0, 12'd8);
+    imem[33] = enc_aes_load(5'd3, 5'd0, 12'd12);
+    imem[34] = enc_nop();
+    imem[35] = enc_aes_encrypt_old();
+    imem[36] = enc_aes_store(5'd0, 5'd0, 12'd80);  // ciphertext -> dmem[20..23]
+    imem[37] = enc_aes_store(5'd1, 5'd0, 12'd84);
+    imem[38] = enc_aes_store(5'd2, 5'd0, 12'd88);
+    imem[39] = enc_aes_store(5'd3, 5'd0, 12'd92);
+    imem[40] = enc_nop();
+
+    // Phase 4: KAT decrypt with old separate module (funct3=011)
+    imem[41] = enc_aes_load(5'd0, 5'd0, 12'd64);  // load known ciphertext
+    imem[42] = enc_aes_load(5'd1, 5'd0, 12'd68);
+    imem[43] = enc_aes_load(5'd2, 5'd0, 12'd72);
+    imem[44] = enc_aes_load(5'd3, 5'd0, 12'd76);
+    imem[45] = enc_nop();
+    imem[46] = enc_aes_decrypt_old();
+    imem[47] = enc_aes_store(5'd0, 5'd0, 12'd96);  // plaintext -> dmem[24..27]
+    imem[48] = enc_aes_store(5'd1, 5'd0, 12'd100);
+    imem[49] = enc_aes_store(5'd2, 5'd0, 12'd104);
+    imem[50] = enc_aes_store(5'd3, 5'd0, 12'd108);
+    imem[51] = enc_nop();
+
     rst_n = 1'b0;
     fetch_enable = 1'b0;
     repeat (5) @(posedge clk);
     rst_n = 1'b1;
     fetch_enable = 1'b1;
 
-    repeat (1000) @(posedge clk);
+    repeat (2500) @(posedge clk);
 
-    $display("==== AES-128 KAT (FIPS-197 C.1) ====");
-    check_block("ENC ", dmem[8],  dmem[9],  dmem[10], dmem[11], CT0, CT1, CT2, CT3);
-    check_block("DEC ", dmem[12], dmem[13], dmem[14], dmem[15], PT0, PT1, PT2, PT3);
+    $display("==== AES-128 KAT (FIPS-197 C.1) — all 4 funct3 modes ====");
+    check_block("ENC     (f3=000)", dmem[8],  dmem[9],  dmem[10], dmem[11], CT0, CT1, CT2, CT3);
+    check_block("DEC     (f3=001)", dmem[12], dmem[13], dmem[14], dmem[15], PT0, PT1, PT2, PT3);
+    check_block("ENC_OLD (f3=010)", dmem[20], dmem[21], dmem[22], dmem[23], CT0, CT1, CT2, CT3);
+    check_block("DEC_OLD (f3=011)", dmem[24], dmem[25], dmem[26], dmem[27], PT0, PT1, PT2, PT3);
 
     if (errors == 0)
       $display("AES KAT TEST PASSED");

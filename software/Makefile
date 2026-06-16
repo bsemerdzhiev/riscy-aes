@@ -18,7 +18,7 @@ LLVM_CFLAGS += -I./$(ACC_DIR)
 LLVM_CFLAGS += -I./$(INCLUDE_DIR)
 LLVM_CFLAGS += $(CONF_CFLAGS)
 LLVM_CFLAGS += -msmall-data-limit=8  -std=gnu11 -nostartfiles -ffunction-sections -fdata-sections -g3 -o0
-LLVM_CFLAGS += --sysroot=$(RISCV_GCC)/$(RISCV_ARCH)
+LLVM_CFLAGS += --sysroot=$(SYSROOT)
 
 
 GCC_WARNS  = -Wall -Wextra -Wshadow -Wundef -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings
@@ -41,7 +41,7 @@ SREC_OBJS := $(OUTPUT_DIR)/soft.srec $(OUTPUT_DIR)/acc.srec
 ELF_OBJS := $(OUTPUT_DIR)/soft.elf $(OUTPUT_DIR)/acc.elf
 
 LINKER_SCRIPT := link.common.ld
-LLVM_LDFLAGS := -fuse-ld=/opt/riscv/bin/riscv32-unknown-elf-ld -Wl,--build-id=none -Wl,-Map=aes.map -T $(LINKER_SCRIPT) -lc -nostdlib
+LLVM_LDFLAGS := -fuse-ld=$(RISCV)/bin/$(RISCV_ARCH)-ld -Wl,--build-id=none -Wl,-Map=aes.map -T $(LINKER_SCRIPT) -lc -nostdlib
 
 # Create output directory
 $(shell mkdir -p $(OUTPUT_DIR))
