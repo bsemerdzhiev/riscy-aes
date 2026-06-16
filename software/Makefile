@@ -26,7 +26,7 @@ OPT         := opt-20
 GCC_WARNS  = -Wall -Wextra -Wshadow -Wundef -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings
 
 # Define common files
-MAIN_SRC := main_d.c 
+MAIN_SRC := main.c 
 MAIN_ASM := crt0.riscv.S
 # Define source files
 SOFT_SRC := $(wildcard $(SOFT_DIR)/*.c)
