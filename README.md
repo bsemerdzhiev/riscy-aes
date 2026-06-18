@@ -1,267 +1,117 @@
-# PDP-Project
+# riscy-aes
 
-## Getting started
+A hardware AES-128 accelerator for the CV32E40P RISC-V core, built for the CESE4040 Processor Design Project at TU Delft. The accelerator adds custom instructions that move the entire AES round structure into the core's execute stage, taking encryption from ~59,560 software cycles down to 200 cycles, and decryption from ~103,995 cycles down to 210, while keeping all post-route timing constraints met.
 
-Required software if running in the server:
+## Why
 
-* Jupyer Notebooks
-* X2GO: see [resources](#resources).
-* VSCode (recommended)
+AES on a general-purpose RISC-V core spends almost all of its time on `SubBytes` and `MixColumns`, which are easy to parallelize in hardware but expensive to do byte-by-byte in software. With Dennard scaling no longer delivering free frequency gains, the only way to get meaningfully faster is to exploit that parallelism directly: pull the data in once, run all 10 AES rounds without going back through the instruction pipeline, and stall the core for exactly as long as the hardware needs and no longer.
 
-Required software if running locally:
+The project frames this as two competing goals relevant to latency-sensitive systems (e.g. encrypted market data in HFT-style pipelines): minimizing clock cycles per block (low latency) versus maximizing blocks processed per second (high throughput). The custom-instruction design here optimizes primarily for the former.
 
-* Jupyer Notebooks
-* [Vivado 2024.2](https://www.xilinx.com/support/download.html): Free version is enough for the FPGA we target.
-* [LLVM](https://llvm.org/docs/GettingStarted.html#getting-the-source-code-and-building-llvm): see [install llvm](#install-llvm)
-* [RISCV GCC](https://github.com/riscv-collab/riscv-gnu-toolchain): see [install gcc](#install-gcc)
-* VSCode (recommended)
+## Architecture
 
-Guides:
-
-* [Workflow](workflow)
-* [Hardware: vivado and rtl](#hardware-vivado-project-and-rtl)
-* [Hardware: running the design on the FPGA](#hardware-running-on-the-fpga)
-* [Working with the server](#run-server)
-* [Guides for local tool setup](#run-locally)
-* [Resources](#resources)
-
-
-Terms:
-* **Memory initialization files (.coe)**: these are just the initial contents of a memory written in a format that vivado understands.
-
-* **Out of Context (OOC) synthesis**: running synthesis of an IP or module independently from the rest of the system, it is an intermediate step to check that there isn't anything fundamentally wrong with your design or to get an initial estimation of resources/timing without having to synthesize the whole design.
-
-## Workflow
-
-The expected workflow for the project is as follows:
-
-* Initially you are given a working software AES C code and a working riscy core. Go through every step first to understand what happens:
-  1. Check what the C code does.
-  2. Compile the C code into memory initialization files.
-  3. Check what the FPGA system and the testbench look like.
-  4. Simulate using your memory initialization files.
-  5. Run OOC synthesis to check baseline results.
-  6. Generate bitstream and run in the FPGA.
-
-* If you write new C code or modify LLVM: proceed to generate the `.coe` files of your C program and verify it works in simulation.
-
-* If you modify your core: write program to test or modify testbench as needed and verify in simulation.
-
-* If it works in simulation, verify it passes timing and check the utilization reports for anything unexpected via OOC synthesis.
-
-* If everything seems fine in OOC synthesis, proceed to generate bitstream and benchmark in FPGA.
-
-* Repeat
-
-## Hardware: Vivado project and RTL
-
-### Sources:
-
-The source code of the riscy core can be found under: `pdp-project/hardware/src/design/riscy`.
-
-The simulation testbench can be found at: `pdp-project/hardware/src/simulation/zynq_tb.sv`.
-
-The system being simulated and implemented on the fpga is generated out of a tcl script (`pdp-project/hardware/scripts/generate_fpga_bd.tcl`), the format is not very user friendly, so it is recommended to open the bd directly in vivado when trying to understand it.
-
-### Scripts:
-
-A few scripts to perform all the basic steps are provided under `pdp-project/hardware/scripts`, they all require to be under `pdp-project/hardware/` when executing them.
-
-Open vivado, and from the tcl console within it:
+The accelerator sits alongside the CV32E40P's existing execute-stage units (ALU, MULT/DOTP, FPU) and reuses the core's load-store unit rather than adding a separate memory port. The state and key live in a small dedicated AES register file ("shadow registers") rather than the main GPRs, so a 128-bit AES state and 128-bit key can be held and operated on as a unit instead of juggled across four 32-bit registers. (CV32E40P itself is not part of this project's contribution — see [Authors](#authors) below for its origin and license.)
 
 ```
-cd ./pdp-project/hardware
-
-# To create the base project:
-source ./scripts/create_project.tcl
-
-# To run simulation and select some waveforms (run after create_project.tcl)
-source ./run_simulation.tcl
-
-# To generate the bitstream from the open project (run after create_project.tcl):
-source ./run_synth_impl.tcl
-
-# To create the base project and generate the bitstream (run from a clean open vivado):
-source ./scripts/gen_bitstream.tcl
-
-# To run Out of Context (OOC) synthesis of the riscy core and output timing and utilization results (run from a clean open vivado):
-source ./create_project_ooc_synth.tcl
+CV32E40P core
+ ├─ IF/ID/EX/WB pipeline (unmodified)
+ ├─ ALU / MULT-DOTP / FPU (existing)
+ └─ AES unit (new)
+      ├─ AES_mem: 128b state + 128b key shadow registers
+      └─ AES core: FSM-driven round datapath
 ```
 
-### Generated files:
+### Custom instructions
 
-The generated bitstream and other products of the full project can be found under the generated folder: `pdp-project/hardware/vivado/riscy/riscy.runs/impl_1`.
+| Instruction | Effect |
+|---|---|
+| `aes32load(sr_index, base, offset)` | Loads 4 bytes via the standard LSU, redirects writeback into the AES shadow register file instead of the GPRs |
+| `aes32store(sr_index, base, offset)` | Stores 4 bytes via the standard LSU, reading from the AES shadow register file |
+| `aes32encrypt` | Runs all 10 AES rounds on the 16-byte state in one instruction, driven by an internal FSM |
+| `aes32decrypt` | Same, in reverse, including in-flight key expansion (round keys are not precomputed) |
 
-The OOC synthesis results can be found under the generated folder: `pdp-project/hardware/vivado/ooc_riscy/ooc_riscy.runs/ooc_synth`.
+A full block operation is 8 loads (state + key) + `aes32encrypt`/`aes32decrypt` + 4 stores. Loads and stores pipeline normally; the encrypt/decrypt instruction stalls the pipeline for the FSM's duration, then resumes.
 
-The hardware hand off file can be found under the generated directory:
-`pdp-project/hardware/vivado/riscy/riscy.gen/sources_1/bd/riscv/hw_handoff/riscv.hwh`.
-This file is used as part of the Overlay to write the bitstream to the fpga via Jupyter Notebooks.
+### Control FSM
 
-## Hardware: Running on the FPGA
+Encryption: `IDLE → BEFORE_START → START → STAGE_ONE ⇄ STAGE_TWO (×10 rounds) → FLUSH → FLUSH_DONE → IDLE`
 
-It is possible to connect the PYNQ board via ethernet cable to your pc, that way you can run Jupyter Notebooks in the hardened ARM core (processing_system) of the FPGA.
+Decryption follows the same shape but adds a `KEY_EXPAND` state before the round loop, since decryption needs round keys computed in the forward direction before consuming them in reverse.
 
-Using this conexion method we can read and write the instructions and data memories connected to the riscy core, start and stop the execution (fetch) of the core or perform reads and writes to any other IP connected to the processing_system.
+### Related work
 
-### Setup:
+The design follows the general shape of [AES-RV](https://arxiv.org/abs/2505.11880) (Nguyen et al., 2025), a hardware-efficient RISC-V AES instruction extension for IoT security, adapted here for the CV32E40P with a from-scratch shadow-register and FSM implementation rather than reusing their core modifications.
 
-* The SD card in the PYNQ board already has all the software required for this, you will only need to set up your PC to be able to access it via ethernet.
+## Results
 
-* Make sure the board is correctly setup, this is explained [here](https://pynq.readthedocs.io/en/latest/getting_started/pynq_z1_setup.html).
+### Latency
 
-* You will have to set up the IP address of your laptop, instructions [here](https://pynq.readthedocs.io/en/latest/appendix/assign_a_static_ip.html#assign-a-static-ip-address).
+Cycles to process one AES-128 block (encryption / decryption), software baseline through the final hardware design:
 
-* Then you can connect via web browser by typing the following broswer address: `http://192.168.2.99/`; or ssh into it with: `ssh xilinx@192.168.2.99`. We recommend you to use the browser.
-If you are asked for a username or a password, it is `xilinx` for both.
+| Implementation | Encryption (cyc) | Decryption (cyc) |
+|---|---|---|
+| Software AES (C, on CV32E40P) | 59,560 | 103,995 |
+| AES32 extension (load/store only, no fused round instr.) | 7,138 | 101,024 |
+| Custom AES (this design) | 200 | 210 |
+| Custom AES (fast clock variant) | 200 | 210 |
 
-### Use:
+That's roughly a 298x speedup on encryption and 495x on decryption over the software baseline, against a theoretical memory-bound ceiling of about 3,971x (limited by 8 loads + 4 stores at one word per instruction, pipelined).
 
-Once logged in, you will be able to browse its contents and run Jupyter Notebooks, this is how the home screen looks, where there should be a copy of the base riscy fpga directory:
+### Resource utilization
 
-![AAAAAA](./images/home_jupyter.png)
+| Implementation | LUTs | FFs | BRAMs | DSPs | F (MHz) |
+|---|---|---|---|---|---|
+| Software AES (C) | 9,227 | 7,957 | 16 | 5 | 20 |
+| AES32 extension | 9,743 | 8,027 | 16 | 5 | 20 |
+| Custom AES | 12,623 | 8,519 | 16 | 5 | 20 |
+| Custom AES (fast) | 12,621 | 8,519 | 16 | 5 | 60 |
 
-If the initial copy of the riscy fpga directory is not present, or you just want a fresh one, you can find it under: `pdp-project/hardware/src/sw/fpga`. This base directory contains a bitstream, memory initialization files and a jupyter notebook generated to run the base software AES implementation in the riscy core on the FPGA.
+Merging the encrypt and decrypt datapaths into a single shared unit rather than keeping them separate saved 202 LUTs (6.2%) and 270 flip-flops (48.1%) versus two standalone modules.
 
-The base riscy fpga directory contains:
+### Timing (post-route, 50 MHz / 20 ns constraint)
 
-![AAAAAA](./images/base_riscy_folder.png)
+All constraints met. Worst negative slack (setup) across the full design: +1.580 ns. Worst hold slack: +0.162 ns. The merged AES unit itself has +5.386 ns of setup slack at a 14.594 ns data path, comfortably inside the 20 ns budget.
 
--`base_riscy.ipynb`: base notebook to control the riscv core execution, showing how to write the bitstream to the fpga, perform reads/writes, control the core, and check the results of the AES software binaries running on the core.
+## Optimizations
 
--`mem_files`: should contain: `data.coe` and `code.coe`, those are the memory initialization files generated from the software AES C code and used by the notebook to load the program.
+**LLVM loop unrolling.** The middle-round loop in the software AES path issues one `aes32esmi`/`aes32dsmi` inline-asm instruction per byte per round. A custom LLVM pass detects loops containing these instructions and force-unrolls them (`UnrollLoopOptions.Count = 9`, `Force = true`), removing per-iteration branch overhead. This took the instruction count for the relevant loop from 16 inline-asm call sites to 144 in the generated IR.
 
--`overlays`: should contain: `base_riscy.bit`, `base_riscy.hwh` and `base_riscy.tcl`. These are the files required to write the bitstream to the rpgrammable logic (PL) and setup the processing system to perform reads/writes. If you generate a new bitstream, you will have to copy and rename to `base_riscy` both `riscv_wrapper.bit` and `riscv_wrapper.tcl` from the implementation directory, and the hardware hand off (`.hwh`) file from the gen directory (`pdp-project/hardware/vivado/riscy/riscy.gen/sources_1/bd/riscv/hw_handoff/riscv.hwh`).
+**Asynchronous dual-clock AES engine (future-work prototype).** A second iteration decouples the AES round datapath onto its own 185 MHz clock domain, separate from the CV32E40P core's 64.5 MHz domain (a 2.87x ratio), so the AES engine isn't bottlenecked by the core's own timing closure. Crossing is handled with single-bit toggle signals (req/ack/done) edge-detected after 2–3 `ASYNC_REG` synchronizer flops, with the 128-bit state/key payload held stable in registers while only the toggle bits cross domains — avoiding the need for a synchronous FIFO. Post-route, the critical path sits inside the AES engine itself at +0.009 ns slack (185 MHz being the deliberate bottleneck), while the core domain has +0.413 ns and the CDC crossing itself carries a comfortable 8 ns of slack via `set_max_delay`. This brings inner-engine latency to 12 AES-domain cycles per block (14 cycles as seen from the core side). It was evaluated as a design exploration rather than merged into the primary submission.
 
-### Base notebook
+A related question explored was BRAM-backed vs. distributed-LUT S-box mapping. BRAM was rejected for three reasons: it has no asynchronous read port (would force an extra pipeline stage), AES needs 20 S-box lookups per round against typically 2 ports per BRAM (requiring duplicated blocks), and the existing LUT-based ROM already sits on a path that's 72% routed, so introducing BRAM placement risked lengthening it. The cost of staying LUT-based is +506 LUTs (+54%) versus allowing BRAM, which was judged acceptable given the full design lands at 22% LUT and 11% BRAM utilization on the PYNQ-Z2.
 
-Open `base_riscy.ipynb`, you can execute the cells one by one in order and observe the behaviour. The notebook cells do the following:
+## Future work
 
-1. Select the bitstream file, set up a few variables used to write/read from the PL, and define a couple of helper functions (initialize memories).
-2. Program the bitstream to the FPGA.
-3. Reboot the RISCY core.
-4. Load instruction and data memories using the helper functions and the memory initialization files.
-5. Start the execution of the program by asserting fetch enable.
-6. Check the outputs generated by the execution of the core.
+- Wider load/store instructions (16 bytes per instruction instead of 4) to cut the load/store overhead that currently dominates the non-round portion of a block's latency.
+- Multiple AES engines running in parallel, scaling throughput with the number of copies, plus block pipelining or DMA streaming to keep them fed.
+- Parallel block-cipher modes (CTR, GCM) for real-world chaining and embarrassingly parallel workloads.
+- Caching expanded round keys across multiple blocks under the same key, instead of re-expanding per block.
+- Side-channel hardening (masking) and support for AES-192/256 key sizes.
 
-## Software
-
-### C code and binaries generation
-
-The source C code of the software AES implementation can be found under: `pdp-project/software/main.c`.
-
-First you will need to update the paths (RISCV_GCC and LLVM) found in the configuration file `pdp-project/software/config/rv32-standard.conf` to point to your specific install of the riscv gcc and llvm.
-
-To generate the binaries and the memory initialization files used for vivado simulation and fpga runs just:
-
-```
-cd pdp-project/software
-
-make soft
-```
-
-You can find the generated binaries under `pdp-project/software/output` and the memory initialization files under `pdp-project/software/bin_files`.
-
-You are encouraged to inspect and understand the Makefile compilation commands.
-
-### LLVM modifications
-
-The provided LLVM toolchain in the server is already compiled, but after any modification to the backend of llvm it is necessary to recompile the llvm toolchain.
-
-If you have only modified the RISCV backend, you don't need to recompile the whole LLVM, to save time by recompiling only the modified RISCV backed do:
+## Repository layout
 
 ```
-cd /path/to/wherever/your/llvm/build/is #TBD
-cmake -G Ninja  -DLLVM_TARGETS_TO_BUILD="RISCV" -DLLVM_ENABLE_PROJECTS="clang;lld" -DCMAKE_BUILD_TYPE=Release -DLLVM_BUILD_TESTS=OFF -DLLVM_INCLUDE_TESTS=OFF "../llvm/"
-
-ninja
+hardware/    SystemVerilog RTL, testbenches, Vivado project/build scripts
+software/    AES reference C implementation, build config
+table_gen/   LLVM/compiler-side generation for the custom instruction encodings
+images/      Diagrams and figures used in documentation
 ```
 
-## Run server
+## Building and running
 
-A server has been setup with all the contents needed for the course.
-Every group will get a unique user and password shared between all the members to access it. 
+This project targets a PYNQ-Z2 board via Vivado. At a high level:
 
-It is highly recommended to logout when you stop working, as it will keep on consuming resources otherwise (you will be logued out automatically as well after 4 hours, so save your work).
+1. Open Vivado and source the project creation script from the `hardware/` directory to build the base project.
+2. Run simulation to verify correctness of the AES instructions against known-good vectors.
+3. Run out-of-context (OOC) synthesis on the AES unit to check timing and utilization in isolation before committing to a full build.
+4. Generate the bitstream and load it onto the PYNQ-Z2, then drive the core via the board's Jupyter Notebook interface over its processing system.
 
-### Connect
+See the scripts under `hardware/scripts` for the individual Tcl entry points (project creation, simulation, OOC synthesis, full synthesis/implementation).
 
-**You need to use VPN if you access the server from eduroam or outside of the TU Delft.**
+## Authors
 
-[X2GO setup instructions](https://qce-it-infra.ewi.tudelft.nl/faq.html#how-to-setup-x2go-for-the-qce-xportal-server).
+**This project (AES accelerator, custom instructions, FSM, async dual-clock extension):**
+Borislav Semerdzhiev, Daniel Stefanov, Isidora Jovanović, Nazar Vasyliev — Group 29, CESE4040 Processor Design Project, TU Delft.
 
-Hostname: ce-procdesign01.ewi.tudelft.nl
-
-We will send you the login username and password once the groups are registered.
-
-### Edit files
-
-Two ways are available to edit files directly in the server:
-
-* Within the server: vim or gedit.
-
-* From your pc, use VSCode with the [VSCode ssh plugin](https://carleton.ca/scs/2024/vscode-remote-access-and-code-editing/).
-
-### Directory structure
-
-All the tools are already installed in it and available under the directory: `~/course`. This directory should not be used to store changes or other files that were not there in the first place.
-
-The tools and projects available in the shared directory:
-* RISCV GCC
-* Standard LLVM
-* PDP-Project: both hardware and software
-
-We recommend copying the PDP-Project and the LLVM to your local area, as you will need to edit/generate files:
-
-```
-cp ~/course/pdp-project ~/pdp-project
-cp ~/course/llvm ~/llvm
-```
-
-Once copied, make sure to update the configuration file `pdp-project/software/config/rv32-standard.conf` to point to your specific install of llvm (update path assigned to variables `RISCV_GCC` and `LLVM`).
-
-
-## Run locally
-
-If you want to run stuff locally you can clone this repo and install the tools used by it as explained below, we recommend the use of the server, but a local setup might be nice for some users.
-
-### Install llvm
-
-Source: [instructions](https://llvm.org/docs/GettingStarted.html#getting-the-source-code-and-building-llvm).
-```
-git clone https://github.com/llvm/llvm-project.git
-
-cd llvm-project
-
-mkdir build-release
-
-cd build-release
-
-#On ubuntu (for other distros check link):
-cmake -G Ninja  -DLLVM_TARGETS_TO_BUILD="RISCV" -DLLVM_ENABLE_PROJECTS="clang;lld" -DCMAKE_BUILD_TYPE=Release -DLLVM_BUILD_TESTS=OFF -DLLVM_INCLUDE_TESTS=OFF "../llvm/"
-
-ninja -j6
-```
-
-### Install GCC
-
-Source: [instructions](https://github.com/riscv-collab/riscv-gnu-toolchain).
-```
-git clone https://github.com/riscv/riscv-gnu-toolchain
-
-cd riscv-gnu-toolchain
-
-#On ubuntu (for other distros check link):
-sudo apt-get install autoconf automake autotools-dev curl python3 python3-pip python3-tomli libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build git cmake libglib2.0-dev libslirp-dev
-
-./configure --prefix=./riscv --with-arch=rv32gc --with-abi=ilp32d
-
-make
-```
-
-## Resources
-
-* [RISC-V Cryptography Extension](https://lists.riscv.org/g/dev-partners/attachment/43/0/riscv-crypto-spec-scalar-v0.9.3-DRAFT.pdf).
-* [Adding custom instruction to LLVM backend](https://github.com/10x-Engineers/clang-builtin-tutorial).
-* [PYNQ board setup](https://pynq.readthedocs.io/en/latest/getting_started/pynq_z1_setup.html).
-* [X2GO setup for QCE servers use](https://qce-it-infra.ewi.tudelft.nl/faq.html#how-to-setup-x2go-for-the-qce-xportal-server).
+**Base CPU core (CV32E40P), not authored by this project:**
+This work extends the CV32E40P RISC-V core, maintained by the [OpenHW Group](https://www.openhwgroup.org) since February 2020. CV32E40P originated as RI5CY, developed by the PULP (Parallel Ultra Low Power) Platform team at ETH Zürich's Integrated Systems Laboratory and the University of Bologna's Energy-efficient Embedded Systems group. CV32E40P is distributed under the Solderpad Hardware License v0.51; see the [openhwgroup/cv32e40p](https://github.com/openhwgroup/cv32e40p) repository for the original source and license terms. None of the core pipeline, register file, or ALU/MULT/FPU logic in this repository's `cv32e40p`-derived files was written by this project's authors — only the AES unit and its integration points are original to this work.
